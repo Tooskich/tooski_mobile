@@ -13,15 +13,16 @@ var tooskiTeams = {
 	 * and then execute a specific function.
 	 */
 	change: function(page, functionToCall) {
-		$.mobile.changePage('html/'+page+'.html', {
+		/*
+		 $.mobile.changePage('html/'+page+'.html', {
 			transition: 'pop'
 		});
-		if (functionToCall) {
-			$(document).bind('pagechange', function() {
-				functionToCall();
-				$(document).unbind('pagechange');
-			})
-		}
+		*/
+		$('#content').load('html/'+page+'.html', function() {
+			if (functionToCall) {
+					functionToCall();
+			}
+		});
 	}
 }
 

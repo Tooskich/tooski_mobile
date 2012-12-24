@@ -5,17 +5,37 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1"> 
 		<link rel="stylesheet" href="css/jquery.mobile.css" />
 	</head> 
-	<body> 
+	<body>
 		<div data-role="page" id="page">
-			<div data-role="header">
+						
+			<div data-role="panel" id="panel" data-position="left">
+				here is a bit of html.here is a bit of html.here is a bit of html.here is a bit of html.here is a bit of html.here is a bit of html.here is a bit of html.here is a bit of html.here is a bit of html.here is a bit of html.here is a bit of html.
+			</div>
+			
+			<div data-role="header" data-id="topBar">
+				<a href="#panel" data-rel="panel" data-icon="grid">Menu</a>
 				<h1>Tooski Teams</h1>
+				
+				<div data-role="navbar">
+					<ul>
+						<li><a href="#" class="ui-btn-active ui-state-persist">News</a></li>
+						<li><a href="#">Photos</a></li>
+						<li><a href="#">Calendrier</a></li>
+					</ul>
+				</div>
 			</div><!-- /header -->
-			<div data-role="content">	
-				<a onClick="tooskiTeams.change('welcome');">Hello world</a>	
+			
+			<div data-role="content" id="content">	
+				<br /><br /><br /><br /><br />
+				<center>
+					<p>Chargement en cours...</p>
+					<img src="images/ajax-loader.gif" alt="Loader" align="center" />
+				</center>
+				<br /><br /><br /><br /><br />
 			</div><!-- /content -->
+			
 		</div><!-- /page -->
 		<script type="text/javascript" src="js/jquery.js"></script>
-		<script type="text/javascript" src="js/jquery.mobile.js"></script>
 		<script type="text/javascript" src="js/teams.js"></script>
 		<script type="text/javascript" >
 			window.onload = function() {
