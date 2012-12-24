@@ -1,3 +1,7 @@
+<!-- 
+	Here is an example of what a "model" page would be. Use $.load to use it as a model,
+	and insert every content you need into the pre-defined id's.
+-->
 <!DOCTYPE html> 
 <html> 
 	<head> 
@@ -11,17 +15,11 @@
 				<h1>Tooski Teams</h1>
 			</div><!-- /header -->
 			<div data-role="content">	
-				<a onClick="tooskiTeams.change('welcome');">Hello world</a>	
+				<a href="../index.html">Hello world</a>	
 			</div><!-- /content -->
 		</div><!-- /page -->
-		<script type="text/javascript" src="js/jquery.js"></script>
+		<script src="js/jquery.js"></script>
 		<script type="text/javascript" src="js/jquery.mobile.js"></script>
 		<script type="text/javascript" src="js/teams.js"></script>
-		<script type="text/javascript" >
-			window.onload = function() {
-				//Function to launch when app is first started.
-				tooskiTeams.init();
-			}
-		</script>
 	</body>
 </html>
