@@ -1,8 +1,43 @@
 //Announcement of the Namespace
 var tooskiTeams = {
+	//TODO: Change this line:
+	ServerUrl: 'http://localhost/tooski/api/',
+	storage: window.localStorage,
+	
+	
+	makeRequest: function(page, object) {
+		var response;
+		$.ajax(this.ServerUrl+page+'.php', {
+			data: object,
+			type: 'POST',
+			success: function(){
+				
+			}
+		});
+	},
+	
+	encrypt: function(message, key) {
+		return Aes.Ctr.encrypt(message, key, 256);
+	},
+	
+	decrypt: function(message, key) {
+		return Aes.Ctr.decrypt(message, key, 256);
+	},
 	
 	login: function() {
-		
+		var pseudo = $('#pseudo').val();
+		var password = $('#password').val();
+		var identifier = this.getUniqueIdentifier();
+		alert(identifier);
+		this.makeRequest('login', {
+			login: pseudo,
+			pass: password, 
+			id: identifier
+		});
+	},
+	
+	getUniqueIdentifier: function() {
+		return (new Date().getTime() + '' + Math.random().toString(36).substring(7)).substring(0, 22);
 	},
 	
 	loadLoginPage: function() {
@@ -10,7 +45,7 @@ var tooskiTeams = {
 			role: 'dialog'
 		});
 	},
-	
+	//TODO: Implement function.
 	loggedIn: function() {
 		return false;
 	},
