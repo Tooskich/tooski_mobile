@@ -94,7 +94,10 @@ var tooskiTeams = {
 	},
 	
 	loggedIn: function() {
-		return (this.storage.user && this.storage.key && this.storage.keyId);
+		if (this.storage.user && this.storage.key && this.storage.keyId) {
+			return true;
+		}
+		return false;
 	},
 	//TODO: Implement with this.makeRequest and server side.
 	getTeamFromServer: function() {
