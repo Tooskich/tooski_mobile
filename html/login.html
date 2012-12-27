@@ -1,0 +1,25 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+		<title>Tooski Teams</title> 
+		<meta name="viewport" content="width=device-width, initial-scale=1"> 
+		<link rel="stylesheet" href="css/jquery.mobile.css" />
+	</head> 
+	<body>
+		<div role="dialog" id="loginPage">
+			<div data-role="header">
+				<h1>Bienvenue !</h1>
+			</div>
+			<div data-role="content">
+				<h3>Bienvenue sur l'app Tooski Team</h3>
+				<p id="loginText" align="justify">
+					Avant toute chose, nous voudrions savoir qui vous êtes. Pour cela, il vous suffit de vous connecter ci-dessous:
+				</p>
+				<div id="loginMessage"></div>
+    			<input type="text" name="pseudo" id="pseudo" value="" placeholder="Pseudo"  />
+    			<input type="password" name="password" id="password" value="" placeholder="Mot de Passe" />
+    			<input type="submit" data-role="button" value="Se Connecter" data-icon="check" onClick="tooskiTeams.login();" />
+			</div>
+		</div>
+	</body>
+</html>
