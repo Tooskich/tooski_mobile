@@ -6,10 +6,7 @@ window.define=function(){Array.prototype.slice.call(arguments).pop()(window.jQue
 
 //Binding swipe with show menu:
 $(document).on('swiperight', function(event, ui) {
-	$( '#panel').panel('open', {display: 'reveal'} );
-});
-$(document).on('swipeleft', function(event, ui) {
-	$( '#panel').panel('close', {display: 'reveal'} );
+	$('#panel').panel('open', {display: 'reveal'});
 });
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */

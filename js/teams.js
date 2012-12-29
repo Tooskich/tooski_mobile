@@ -1,7 +1,9 @@
 //Announcement of the Namespace
 var tooskiTeams = {
 	//TODO: Change this line:
-	ServerUrl: 'http://192.168.1.103/tooski/api/',
+	ServerUrl: 'http://192.168.0.106/tooski/api/',
+	//TODO: change this line:
+	base_url: '',
 	storage: localStorage,
 	db: null,
 	
@@ -11,11 +13,12 @@ var tooskiTeams = {
 		return true;
 	},
 	
-	makeRequest: function(page, object, callback) {
+	makeRequest: function(page, object, cbFunction) {
 		$.ajax(this.ServerUrl+page+'.php', {
 			data: object,
+			dataType: 'jsonp',
 			type: 'POST'
-		}).done(callback);
+		}).done(cbFunction);
 	},
 	
 	encrypt: function(message, key) {
@@ -30,6 +33,10 @@ var tooskiTeams = {
 		var pseudo = $('#pseudo').val();
 		var password = $('#password').val();
 		var identifier = this.getUniqueIdentifier();
+		//Storing the Important data.
+		this.storage.user = pseudo;
+		this.storage.password = password;
+		this.storage.key = identifier;
 		this.makeRequest('login', {
 			login: pseudo,
 			pass: this.encrypt(password, password), 
@@ -39,7 +46,10 @@ var tooskiTeams = {
 			if (response.state == 1) {
 				$('#loginMessage').html('<center><p><i><font color="green">'+response.message+'</font></i></p></center>');
 				tooskiTeams.storage.keyId = response.id;
-				tooskiTeams.init();
+				$(document).bind('pagechange', function() {
+					tooskiTeams.init();
+				});
+				$.mobile.changePage('index.html', {reloadPage:true, allowSamePageTransition:true});
 			}
 			else if (response.state == 0) {
 				$('#loginMessage').html('<center><p><i><font color="red">'+response.message+'</font></i></p></center>');
@@ -48,10 +58,6 @@ var tooskiTeams = {
 				$('#loginMessage').html('<center><p><i><font color="red">Problèmes de connexion avec le serveur.</font></i></p></center>');
 			}
 		});
-		//Storing the Important data.
-		this.storage.user = pseudo;
-		this.storage.password = password;
-		this.storage.key = identifier;
 	},
 	
 	getUniqueIdentifier: function() {
@@ -59,7 +65,7 @@ var tooskiTeams = {
 	},
 	
 	loadLoginPage: function() {
-		$.mobile.loadPage('html/login.html', {
+		$.mobile.loadPage(this.base_url+'html/login.html', {
 			role: 'dialog'
 		}).done(function() {
 			$('div[data-url="/tooski_mobile/html/login.html"]').attr('id', 'loginPage');
@@ -68,15 +74,42 @@ var tooskiTeams = {
 		});
 	},
 	
+	getLastNewsFromServer: function(teamId) {
+		this.storage.hasNewsInDB = true;
+		return
+	},
+	
+	showListNewsFromDb: function(teamId) {
+		
+	},
+	
+	hasNewsInDB: function() {
+		if (this.storage.hasNewsInDB) {
+			return true;
+		}
+		return false;
+	},
+	
+	loadTeamNews: function(teamId) {
+		$('#panel').panel('close', {display: 'reveal'});
+		this.message('show', '');
+		if (this.hasNewsInDB()) {
+			this.showListNewsFromDb(teamId);
+			this.message('hide', '');
+		}
+		this.getLastNewsFromServer(teamId);
+		this.showListNewsFromDb(teamId);
+	},
+	
 	generateTeamMenu: function() {
-		$('#panel').html('<h3 style="margin-bottom:0px;margin-top:10px;margin-left:15px;" align="center">Teams</h3><hr style="maring-left:5px;" align="center" height="10px" width="90%" /><hr color="black" size="1px" width="100%" style="margin-bottom:10px;">');
+		$('#panel').html('<h3 style="margin-bottom:0px;margin-top:10px;margin-left:15px;" align="center">Teams</h3><hr style="maring-left:5px;" align="center" height="10px" width="90%" /><hr color="black" size="2px" width="100%" style="margin-bottom:10px;">');
 		this.db.transaction(function(tx) {
 			tx.executeSql('SELECT * FROM teams',
 			[],
 			function(tx, rs){
 				var html = '';
 				for (var i=0; i < rs.rows.length; i++) {
-					html += '<div style="padding-left:5px;border-bottom:solid black 1px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:5px;padding-bottom:4px;margin-top:5px;margin-bottom:4px;"><img src="'+rs.rows.item(i).logo+'" style="max-height:30px;max-width:75px;margin-right:10px;vertical-align:middle;" />'+rs.rows.item(i).name+'</h4></div>';
+					html += '<div onClick="tooskiTeams.loadTeamNews('+rs.rows.item(i).id+');" style="padding-left:5px;border-bottom:solid black 2px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:5px;padding-bottom:4px;margin-top:5px;margin-bottom:4px;"><img src="'+rs.rows.item(i).logo+'" style="max-height:30px;max-width:75px;margin-right:10px;vertical-align:middle;" />'+rs.rows.item(i).name+'</h4></div>';
 				}
 				$('#panel').append(html);
 			},
@@ -90,7 +123,15 @@ var tooskiTeams = {
 	},
 	
 	getWelcomePage: function() {
-		console.log('WelcomePage');
+		this.change('welcome');
+	},
+	
+	message: function(state, text) {
+		$.mobile.loading(state, {
+			text:text, 
+			textonly:false, 
+			textVisible:true
+		});
 	},
 	
 	loggedIn: function() {
@@ -139,9 +180,7 @@ var tooskiTeams = {
 	 * The first function to be called when the app is started.
 	 */
 	init: function() {
-		if (!($.mobile.activePage[0].id == 'page')) {
-			$.mobile.changePage('index.html');
-		}
+		this.message('show', 'Chargement en cours...');
 		if (this.loggedIn()) {
 			if (!this.hasTeamSettings()) {
 				this.getTeamSettings();
@@ -152,6 +191,7 @@ var tooskiTeams = {
 		else {
 			this.loadLoginPage();
 		}
+		this.message('hide', 'Chargement en cours...');
 	},
 	
 	/*
@@ -159,7 +199,7 @@ var tooskiTeams = {
 	 * and then execute a specific function.
 	 */
 	change: function(page, functionToCall) {
-		$('#content').load('html/'+page+'.html', function() {
+		$('#content').load(this.base_url+'html/'+page+'.html', function() {
 			if (functionToCall) {
 					functionToCall();
 			}

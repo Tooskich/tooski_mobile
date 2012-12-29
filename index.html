@@ -26,19 +26,17 @@
 				</div>
 			</div><!-- /header -->
 			
-			<div data-role="content" id="content">	
-				<br /><br /><br /><br /><br />
-				<center>
-					<p>Chargement en cours...</p>
-					<img src="images/ajax-loader.gif" alt="Loader" align="center" />
-				</center>
-				<br /><br /><br /><br /><br />
+			<div data-role="content" id="content">
 			</div><!-- /content -->
 			
 		</div><!-- /page -->
 		<script type="text/javascript" src="js/jquery.js"></script>
 		<script type="text/javascript" src="js/teams.js"></script>
 		<script type="text/javascript" >
+			 $(document).bind( "mobileinit", function(){
+        $.support.cors = true;
+        $.mobile.allowCrossDomainPages = true;       
+    });
 			window.onload = function() {
 				//Function to launch when app is first started.
 				tooskiTeams.init();
