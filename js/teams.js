@@ -7,6 +7,7 @@ var tooskiTeams = {
 	storage: localStorage,
 	db: null,
 	nbNewsToShow: 25,
+	nbEventsToShow: 25,
 	
 	
 	//TODO: Implement function:
@@ -74,7 +75,7 @@ var tooskiTeams = {
 			$('div[data-role="header"] > a[data-icon="delete"]').hide();
 		});
 	},
-	
+	//TODO: Implement with server. Note: Server should return only +-100 last news.
 	getLastNewsFromServer: function(teamId) {
 		return '{"news": [{"title":"Première", "id":"1", "date":"1356889379", "text":"Dernière à afficher. Elle contient une image: <br /><img src=\'http://tooski.ch/assets/uploads/files/header.png\' />" },{"title":"Deuxième", "id":"2", "date":"1356889441", "text":"Mais première à être affichée." },{"title":"Troisième", "id":"3", "date":"1356889421", "text":"Mais c\'est celle du milieu." }]}';
 	},
@@ -102,7 +103,7 @@ var tooskiTeams = {
 				tooskiTeams.change('news', function(){
 					var date = new Date(news.date * 1000);
 					$('#newsTitle').html(news.title);
-					$('#newsDate').html(date.getDate()+'/'+date.getMonth()+'/'+date.getFullYear()+' à '+date.getHours()+':'+date.getMinutes());
+					$('#newsDate').html(date.getDate()+'.'+date.getMonth()+'.'+date.getFullYear()+' à '+date.getHours()+':'+date.getMinutes());
 					$('#newsContent').html(news.text);
 				});
 			},
@@ -125,7 +126,7 @@ var tooskiTeams = {
 			var content = '<img src="'+image+'" width="100%" />';
 		}
 		else {
-			var content = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').substring(0, 125)+'...';
+			var content = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').substring(0, 300)+'...';
 		}
 		return '<div onclick="tooskiTeams.showNews('+id+');" class="team-news-div-preview"><div><h2 style="margin:0px;padding:5px;">'+title+'</h2></div><div>'+content+'</div></div>';
 	},
@@ -161,8 +162,59 @@ var tooskiTeams = {
 		this.showListNewsFromDb(teamId);
 	},
 	
+	hasEventsInDB: function() {
+		if (false){//this.storage.hasEventsInDB) {
+			return true;
+		}
+		return false;
+	},
+	//TODO: Implement with server connection Note: the server should return ALL events from its database. 
+	getLastEventsFromServer: function(teamId) {
+		return '{"event":[{"id":"1", "title":"First", "place":"Anywhere", "description":"Description of the last event to show...", "date":"1356905341", "file":"-"},{"id":"2", "title":"Second", "place":"Where you want it", "description":"This one is the second event. Won\'t happen anyway...", "date":"1356905361", "file":"http://www.tooski.ch/randomfile.txt"},{"id":"3", "title":"Third Event yahooooooooo", "place":"????????????", "description":"This one only has extra long texts. This means extra long title, extra long date, extra long description, extralong filename, extralong everything. It is the first one to be showed, and let\'s see if it works correctly...", "date":"1356905380", "file":"http://www.tooski.ch/extra/long/u/r/l/youcannotseewhatiwrite/random/file/yahooooooooooo/google/file.txt"}]}';
+	},
+	
+	getEventsIntoDB: function(teamId) {
+		var eventsJson = this.getLastEventsFromServer(teamId);
+		var obj = $.parseJSON(eventsJson);
+		this.db.transaction(function(tx) {
+			for (var i=0; i < obj.event.length; i++) {
+				tx.executeSql('INSERT OR REPLACE INTO events(id, idTeam, title, description, date, place, file) VALUES (?, ?, ?, ?, ?, ?, ?)',
+				[obj.event[i].id, teamId, obj.event[i].title, obj.event[i].description, obj.event[i].date, obj.event[i].place, obj.event[i].file],
+				function(){},
+				this.dbError);
+			}
+		});
+		//TODO: Uncomment: this.storage.hasEventsInDB = true;
+	}, 
+	
+	createTeamEventView: function(title, description, date, place, file) {
+		date = new Date(date * 1000);
+		date = 'Le ' + date.getDate() + '.' + date.getMonth() + '.' + date.getFullYear();
+		return '<div class="eventContainer"><div class="eventHeader"><h2 align="left" class="eventHeaderTitle">'+title+'</h2><p align="right" class="eventHeaderDate">'+date+'</p></div><div class="eventContent"><p align="justify">'+description+'</p></div><div class="eventFooter"><table width="100%"><tr><td><h3>Quand</h3><p>'+date+'</p></td><td><h3>Où</h3><p>'+place+'</p></td><td><h3>Infos</h3><p><a href="'+file+'">Télécharger</a></p></td></tr></table></div></div>';
+	},
+	
+	showListEventsFromDB: function(teamId) {
+		this.db.transaction(function(tx) {
+			tx.executeSql('SELECT * FROM events WHERE idTeam=? ORDER BY date DESC', 
+			[teamId],
+			function(tx, rs) {
+				var html='<center>';
+				for (var i=0; i < tooskiTeams.nbEventsToShow && i < rs.rows.length; i++) {
+					html += tooskiTeams.createTeamEventView(rs.rows.item(i).title, rs.rows.item(i).description, rs.rows.item(i).date, rs.rows.item(i).place, rs.rows.item(i).file);
+				}
+				html += '</center>';
+				$('#content').html(html);
+			},
+			this.dbError);
+		});
+	},
+	
 	loadTeamCalendar: function(teamId) {
-		alert('Calendar');
+		if (this.hasEventsInDB()) {
+			this.showListEventsFromDB(teamId);
+		}
+		this.getEventsIntoDB(teamId);
+		this.showListEventsFromDB(teamId);
 	},
 	
 	loadTeamPhoto: function(teamId) {
@@ -269,6 +321,7 @@ var tooskiTeams = {
 	 */
 	init: function() {
 		this.message('show', 'Chargement en cours...');
+		this.initializeDatabase();
 		if (this.loggedIn()) {
 			if (!this.hasTeamSettings()) {
 				this.getTeamSettings();

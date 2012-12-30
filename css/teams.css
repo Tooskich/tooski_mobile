@@ -1,4 +1,4 @@
-.team-news-div-preview {
+.team-news-div-preview, .eventContainer {
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
@@ -9,7 +9,15 @@
   	-moz-box-shadow: 0px 0px 5px #000000;
   	box-shadow: 0px 0px 5px #000000;
 }
-
 .newsContent {
 	margin:25px;
+}
+.eventContent {
+	margin:5px;
+}
+.eventHeaderTitle, .eventHeaderDate {
+	margin:0px;
+	padding:0px;
+	margin-right:5px;
+	margin-left:5px;
 }
