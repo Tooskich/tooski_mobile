@@ -97,8 +97,19 @@ var tooskiTeams = {
 		if (text.indexOf('<img') != -1) {
 			var image = text.substring(text.indexOf('<img'));
 			image = image.substring(0, image.indexOf('>')+1);
+			image = image.substring(image.indexOf('src=')+5);
+			if (image.indexOf('\'') != -1) {
+				image = image.substring(0, image.indexOf('\''));
+			}
+			if (image.indexOf('"') != -1) {
+				image = image.substring(0, image.indexOf('"'));
+			}
+			var content = '<img src="'+image+'" width="100%" />';
 		}
-		return '<p>'+text+'</p>';
+		else {
+			var content = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').substring(0, 125)+'...';
+		}
+		return '<div onclick="alert('+id+');" style="border:solid black 1px; display:block;margin:25px;"><div><h2 style="margin:0px;padding:5px;">'+title+'</h2></div><div>'+content+'</div></div>';
 	},
 	
 	showListNewsFromDb: function(teamId) {
@@ -106,10 +117,11 @@ var tooskiTeams = {
 			tx.executeSql('SELECT * FROM news WHERE idTeam=? ORDER BY date DESC', 
 			[teamId],
 			function(tx, rs) {
-				var html='';
+				var html='<center>';
 				for (var i=0; i < tooskiTeams.nbNewsToShow && i < rs.rows.length; i++) {
 					html += tooskiTeams.createTeamNewsPreview(rs.rows.item(i).title, rs.rows.item(i).text, rs.rows.item(i).id);
 				}
+				html += '</center>';
 				$('#content').html(html);
 			},
 			this.dbError);
