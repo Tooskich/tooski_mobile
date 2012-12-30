@@ -93,6 +93,24 @@ var tooskiTeams = {
 		//TODO: Uncomment: this.storage.hasNewsInDB = true;
 	},
 	
+	showNews: function(newsId) {
+		this.db.transaction(function(tx) {
+			tx.executeSql('SELECT * FROM news WHERE id=?', 
+			[newsId],
+			function(tx, rs) {
+				news = rs.rows.item(0);
+				tooskiTeams.change('news', function(){
+					var date = new Date(news.date * 1000);
+					$('#newsTitle').html(news.title);
+					$('#newsDate').html(date.getDate()+'/'+date.getMonth()+'/'+date.getFullYear()+' à '+date.getHours()+':'+date.getMinutes());
+					$('#newsContent').html(news.text);
+				});
+			},
+			tooskiTeams.dbError
+			);
+		});
+	},
+	
 	createTeamNewsPreview: function(title, text, id) {
 		if (text.indexOf('<img') != -1) {
 			var image = text.substring(text.indexOf('<img'));
@@ -109,7 +127,7 @@ var tooskiTeams = {
 		else {
 			var content = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').substring(0, 125)+'...';
 		}
-		return '<div onclick="alert('+id+');" style="border:solid black 1px; display:block;margin:25px;"><div><h2 style="margin:0px;padding:5px;">'+title+'</h2></div><div>'+content+'</div></div>';
+		return '<div onclick="tooskiTeams.showNews('+id+');" class="team-news-div-preview"><div><h2 style="margin:0px;padding:5px;">'+title+'</h2></div><div>'+content+'</div></div>';
 	},
 	
 	showListNewsFromDb: function(teamId) {
@@ -184,8 +202,8 @@ var tooskiTeams = {
 		});
 	},
 	
-	dbError: function() {
-		alert('Problème lors de la connexion à la base de donnée. Veuillez relancer l\'app en cas de récidive.');
+	dbError: function(tx, e) {
+		alert('Problème lors de la connexion à la base de donnée. Veuillez relancer l\'app en cas de récidive.' + e.message);
 	},
 	
 	getWelcomePage: function() {
