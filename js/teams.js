@@ -5,7 +5,7 @@ var tooskiTeams = {
 	//TODO: change this line:
 	base_url: '',
 	storage: localStorage,
-	db: openDatabase('tooskiteamDBtest', '1.0', 'The Tooski Team App Database', 65536),
+	db: openDatabase('tooskiteamDB', '1.0', 'The Tooski Team App Database', 65536),
 	nbNewsToShow: 25,
 	nbEventsToShow: 25,
 	
@@ -14,16 +14,19 @@ var tooskiTeams = {
 		$.ajax(this.ServerUrl+page+'.php', {
 			data: object,
 			dataType: 'jsonp',
-			type: 'POST'
-		}).done(cbFunction);
+			type: 'POST',
+			success: function (data) {
+				cbFunction(data);
+			} 
+		});
 	},
 	
 	encrypt: function(message, key) {
-		return Aes.Ctr.encrypt(message, '1'+key, 256);
+		return Aes.Ctr.encrypt(''+message, '1'+key, 256);
 	},
 	
 	decrypt: function(message, key) {
-		return Aes.Ctr.decrypt(message, '1'+key, 256);
+		return Aes.Ctr.decrypt(''+message, '1'+key, 256);
 	},
 	
 	login: function() {
@@ -33,7 +36,7 @@ var tooskiTeams = {
 		//Storing the Important data.
 		this.storage.user = pseudo;
 		this.storage.password = password;
-		this.storage.key = identifier;
+		this.storage.key = ''+identifier;
 		this.makeRequest('login', {
 			login: pseudo,
 			pass: this.encrypt(password, password), 
@@ -73,21 +76,39 @@ var tooskiTeams = {
 	},
 	//TODO: Implement with server. Note: Server should return only +-100 last news.
 	getLastNewsFromServer: function(teamId) {
-		return '{"news": [{"title":"Première", "id":"1", "date":"1356889379", "text":"Dernière à afficher. Elle contient une image: <br /><img src=\'http://tooski.ch/assets/uploads/files/header.png\' />" },{"title":"Deuxième", "id":"2", "date":"1356889441", "text":"Mais première à être affichée." },{"title":"Troisième", "id":"3", "date":"1356889421", "text":"Mais c\'est celle du milieu." }]}';
+		tooskiTeams.makeRequest('news', {
+			id: this.storage.keyId,
+			team: teamId
+		}, function (data) {
+			tooskiTeams.insertNewsInDB(data);
+			alert(data);
+		}); 
+		//'{"news": [{"title":"Première", "id":"1", "date":"1356889379", "text":"Dernière à afficher. Elle contient une image: <br /><img src=\'http://tooski.ch/assets/uploads/files/header.png\' />" },{"title":"Deuxième", "id":"2", "date":"1356889441", "text":"Mais première à être affichée." },{"title":"Troisième", "id":"3", "date":"1356889421", "text":"Mais c\'est celle du milieu." }]}';
 	},
 	
-	getNewsIntoDB: function(teamId) {
-		var newsJson = this.getLastNewsFromServer(teamId);
-		var obj = $.parseJSON(newsJson);
+	insertNewsInDB: function (newsJson) {
+		var obj = $.parseJSON(newsJson);	
+		alert('ok')
 		this.db.transaction(function(tx) {
-			for (var i=0; i < obj.news.length; i++) {
-				tx.executeSql('INSERT OR REPLACE INTO news(id, idTeam, title, text, date) VALUES (?, ?, ?, ?, ?)',
-				[obj.news[i].id, teamId, obj.news[i].title, obj.news[i].text, obj.news[i].date],
-				function(){},
-				this.dbError);
+			for (i in obj.news) {
+				alert('asd')
+				var nId = parseInt(this.decrypt(obj.news[i].id, this.storage.key));
+				var nTitle = this.decrypt(obj.news[i].title, this.storage.key);
+				var nText = this.decrypt(obj.news[i].text, this.storage.key);
+				var nDate = this.decrypt(obj.news[i].date, this.storage.key);
+				(function(id, idTeam, title, text, date){
+					tx.executeSql('INSERT OR REPLACE INTO news(id, idTeam, title, text, date) VALUES (?, ?, ?, ?, ?)',
+					[id, idTeam, title, text, date],
+					function(){},
+					this.dbError);
+				})(nId, 6, nTitle, nText, nDate);
 			}
 		});
 		//TODO: Uncomment: this.storage.hasNewsInDB = true;
+	},
+	
+	getNewsIntoDB: function(teamId) {
+		this.getLastNewsFromServer(teamId);
 	},
 	
 	showNews: function(newsId) {
@@ -186,7 +207,7 @@ var tooskiTeams = {
 	createTeamEventView: function(title, description, date, place, file) {
 		date = new Date(date * 1000);
 		date = 'Le ' + date.getDate() + '.' + date.getMonth() + '.' + date.getFullYear();
-		return '<div class="eventContainer"><div class="eventHeader"><h2 align="left" class="eventHeaderTitle">'+title+'</h2><p align="right" class="eventHeaderDate">'+date+'</p></div><div class="eventContent"><p align="justify">'+description+'</p></div><div class="eventFooter"><table width="100%"><tr><td><h3>Quand</h3><p>'+date+'</p></td><td><h3>Où</h3><p>'+place+'</p></td><td><h3>Infos</h3><p><a href="'+file+'">Télécharger</a></p></td></tr></table></div></div>';
+		return '<div class="eventContainer"><div class="eventHeader"><h2 align="left" class="eventHeaderTitle">'+title+'</h2><p align="right" class="eventHeaderDate">'+date+'</p></div><div class="eventContent"><p align="justify">'+description+'</p></div><div class="eventFooter"><table width="100%"><tr><td><h3>Quand</h3><p>'+date+'</p></td><td><h3>Où</h3><p>'+place+'</p></td><td><h3>Infos</h3><p><a data-role="button" data-icon="info" data-inline="true" data-mini="true" href="'+file+'">Télécharger</a></p></td></tr></table></div></div>';
 	},
 	
 	showListEventsFromDB: function(teamId) {
@@ -200,6 +221,7 @@ var tooskiTeams = {
 				}
 				html += '</center>';
 				$('#content').html(html);
+				$('#content').trigger('create');
 			},
 			this.dbError);
 		});
@@ -227,10 +249,11 @@ var tooskiTeams = {
 			function(tx, rs) {
 				var html='<center><div id="photoGallery" class="gallery">';
 				for (var i=0; i < rs.rows.length; i++) {
-					html += '<a href="'+$.cloudinary.url(rs.rows.item(i).filename)+'"><img src="'+$.cloudinary.url(rs.rows.item(i).filename,{width:300, crop:'fill'})+'" width="150px" alt="'+rs.rows.item(i).description+'" /></a>&nbsp;&nbsp;&nbsp;';
+					html += '<a class="imgContainer" href="'+$.cloudinary.url(rs.rows.item(i).filename)+'"><img src="'+$.cloudinary.url(rs.rows.item(i).filename,{width:300, crop:'fill'})+'" width="150px" alt="'+rs.rows.item(i).description+'" /></a>';
 				}
 				html += '</div></center>';
 				$('#photoLibrary').html(html);
+				$('#loader').trigger('create');
 				$("#photoLibrary a").photoSwipe({
 					enableMouseWheel: false , 
 					enableKeyboard: false ,
@@ -247,7 +270,8 @@ var tooskiTeams = {
 	},
 	
 	preparePhotoPage: function(teamId) {
-		$('#content').html('<div id="photoUpload"><center><a onClick="tooskiTeams.openNewUploadImageScreen('+teamId+');" href="" data-role="button">Partager mes photos</a></center></div><hr size="2px" width="100%" /><div id="photoLibrary"></div>');
+		$('#content').html('<div id="photoUpload"><center><button href="#" data-role="button" data-icon="plus" onClick="tooskiTeams.openNewUploadImageScreen('+teamId+');" >Ajouter des Photos</button></center></div><br /><hr size="2px" width="100%" /><h3>Galerie Photo</h3><div id="photoLibrary"></div>');
+		$('#content').trigger('create');
 	},
 	//TODO: Implement with server connection. Should only return <= 100 results.
 	getLastPhotosFromServer: function(teamId) {
@@ -407,6 +431,7 @@ var tooskiTeams = {
 	 */
 	change: function(page, functionToCall) {
 		$('#content').load(this.base_url+'html/'+page+'.html', function() {
+			$('#content').trigger('create');
 			if (functionToCall) {
 					functionToCall();
 			}
