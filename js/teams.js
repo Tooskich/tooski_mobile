@@ -15,10 +15,8 @@ var tooskiTeams = {
 			data: object,
 			dataType: 'jsonp',
 			type: 'POST',
-			success: function (data) {
-				cbFunction(data);
-			} 
-		});
+			complete: cbFunction
+		}).done(cbFunction);
 	},
 	
 	encrypt: function(message, key) {
@@ -74,41 +72,18 @@ var tooskiTeams = {
 		});
 		this.initializeDatabase();
 	},
-	//TODO: Implement with server. Note: Server should return only +-100 last news.
-	getLastNewsFromServer: function(teamId) {
+
+	//TODO: Implement server side.
+	getNewsIntoDB: function(teamId) {
 		tooskiTeams.makeRequest('news', {
 			id: this.storage.keyId,
 			team: teamId
-		}, function (data) {
-			tooskiTeams.insertNewsInDB(data);
-			alert(data);
+		}, function (data, teamId) {
+			tooskiTeams.storage.news = data.responseText;
+			tooskiTeams.showListNewsFromDb(teamId);
+			//TODO: Uncomment: this.storage.hasNewsInDB = true;
 		}); 
 		//'{"news": [{"title":"Première", "id":"1", "date":"1356889379", "text":"Dernière à afficher. Elle contient une image: <br /><img src=\'http://tooski.ch/assets/uploads/files/header.png\' />" },{"title":"Deuxième", "id":"2", "date":"1356889441", "text":"Mais première à être affichée." },{"title":"Troisième", "id":"3", "date":"1356889421", "text":"Mais c\'est celle du milieu." }]}';
-	},
-	
-	insertNewsInDB: function (newsJson) {
-		var obj = $.parseJSON(newsJson);	
-		alert('ok')
-		this.db.transaction(function(tx) {
-			for (i in obj.news) {
-				alert('asd')
-				var nId = parseInt(this.decrypt(obj.news[i].id, this.storage.key));
-				var nTitle = this.decrypt(obj.news[i].title, this.storage.key);
-				var nText = this.decrypt(obj.news[i].text, this.storage.key);
-				var nDate = this.decrypt(obj.news[i].date, this.storage.key);
-				(function(id, idTeam, title, text, date){
-					tx.executeSql('INSERT OR REPLACE INTO news(id, idTeam, title, text, date) VALUES (?, ?, ?, ?, ?)',
-					[id, idTeam, title, text, date],
-					function(){},
-					this.dbError);
-				})(nId, 6, nTitle, nText, nDate);
-			}
-		});
-		//TODO: Uncomment: this.storage.hasNewsInDB = true;
-	},
-	
-	getNewsIntoDB: function(teamId) {
-		this.getLastNewsFromServer(teamId);
 	},
 	
 	showNews: function(newsId) {
@@ -143,25 +118,35 @@ var tooskiTeams = {
 			var content = '<img src="'+image+'" width="100%" />';
 		}
 		else {
-			var content = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').substring(0, 300)+'...';
+			var div = document.createElement("div");
+			div.innerHTML = text;
+			var content = '<p align="justify">'+(div.textContent || div.innerText || "").substring(0, 300)+'...'+'</p>';
 		}
 		return '<div onclick="tooskiTeams.showNews('+id+');" class="team-news-div-preview"><div><h2 style="margin:0px;padding:5px;">'+title+'</h2></div><div>'+content+'</div></div>';
 	},
 	
+	sortByDate: function (a, b) {
+		if (parseInt(tooskiTeams.decrypt(a.date, tooskiTeams.storage.key)) > parseInt(tooskiTeams.decrypt(b.date, tooskiTeams.storage.key))) {
+			return -1;
+		}
+		if (parseInt(tooskiTeams.decrypt(a.date, tooskiTeams.storage.key)) < parseInt(tooskiTeams.decrypt(b.date, tooskiTeams.storage.key))) {
+			return 1;
+		}
+		return 0
+	},
+	
 	showListNewsFromDb: function(teamId) {
-		this.db.transaction(function(tx) {
-			tx.executeSql('SELECT * FROM news WHERE idTeam=? ORDER BY date DESC', 
-			[teamId],
-			function(tx, rs) {
-				var html='<center>';
-				for (var i=0; i < tooskiTeams.nbNewsToShow && i < rs.rows.length; i++) {
-					html += tooskiTeams.createTeamNewsPreview(rs.rows.item(i).title, rs.rows.item(i).text, rs.rows.item(i).id);
-				}
-				html += '</center>';
-				$('#content').html(html);
-			},
-			this.dbError);
-		});
+		var obj = $.parseJSON(this.storage.news);
+		obj.news.sort(this.sortByDate);
+		var html = '<center>';
+		for (var i=0; i < obj.news.length && i < tooskiTeams.nbNewsToShow; i++) {
+			var title = this.decrypt(obj.news[i].title, this.storage.key);
+			var text = this.decrypt(obj.news[i].text, this.storage.key);
+			var id = this.decrypt(obj.news[i].id, this.storage.key);
+			html += tooskiTeams.createTeamNewsPreview(title, text, id);
+		}
+		html += '</center>';
+		$('#content').html(html);
 	},
 	
 	hasNewsInDB: function() {
