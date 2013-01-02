@@ -34,7 +34,7 @@ var tooskiTeams = {
 		//Storing the Important data.
 		this.storage.user = pseudo;
 		this.storage.password = password;
-		this.storage.key = ''+identifier;
+		this.storage.secret = ''+identifier;
 		this.makeRequest('login', {
 			login: pseudo,
 			pass: this.encrypt(password, password), 
@@ -126,10 +126,10 @@ var tooskiTeams = {
 	},
 	
 	sortByDate: function (a, b) {
-		if (parseInt(tooskiTeams.decrypt(a.date, tooskiTeams.storage.key)) > parseInt(tooskiTeams.decrypt(b.date, tooskiTeams.storage.key))) {
+		if (parseInt(tooskiTeams.decrypt(a.date, tooskiTeams.storage.secret)) > parseInt(tooskiTeams.decrypt(b.date, tooskiTeams.storage.secret))) {
 			return -1;
 		}
-		if (parseInt(tooskiTeams.decrypt(a.date, tooskiTeams.storage.key)) < parseInt(tooskiTeams.decrypt(b.date, tooskiTeams.storage.key))) {
+		if (parseInt(tooskiTeams.decrypt(a.date, tooskiTeams.storage.secret)) < parseInt(tooskiTeams.decrypt(b.date, tooskiTeams.storage.secret))) {
 			return 1;
 		}
 		return 0
@@ -140,9 +140,9 @@ var tooskiTeams = {
 		obj.news.sort(this.sortByDate);
 		var html = '<center>';
 		for (var i=0; i < obj.news.length && i < tooskiTeams.nbNewsToShow; i++) {
-			var title = this.decrypt(obj.news[i].title, this.storage.key);
-			var text = this.decrypt(obj.news[i].text, this.storage.key);
-			var id = this.decrypt(obj.news[i].id, this.storage.key);
+			var title = this.decrypt(obj.news[i].title, this.storage.secret);
+			var text = this.decrypt(obj.news[i].text, this.storage.secret);
+			var id = this.decrypt(obj.news[i].id, this.storage.secret);
 			html += tooskiTeams.createTeamNewsPreview(title, text, id);
 		}
 		html += '</center>';
@@ -335,7 +335,7 @@ var tooskiTeams = {
 	},
 	
 	loggedIn: function() {
-		if (this.storage.user && this.storage.key && this.storage.keyId) {
+		if (this.storage.user && this.storage.secret && this.storage.keyId) {
 			return true;
 		}
 		return false;
