@@ -5,15 +5,10 @@ var tooskiTeams = {
 	//TODO: change this line:
 	base_url: '',
 	storage: localStorage,
-	db: null,
+	db: openDatabase('tooskiteamDBtest', '1.0', 'The Tooski Team App Database', 65536),
 	nbNewsToShow: 25,
 	nbEventsToShow: 25,
 	
-	
-	//TODO: Implement function:
-	getLastNews: function() {
-		return true;
-	},
 	
 	makeRequest: function(page, object, cbFunction) {
 		$.ajax(this.ServerUrl+page+'.php', {
@@ -74,6 +69,7 @@ var tooskiTeams = {
 			$.mobile.changePage('#loginPage');
 			$('div[data-role="header"] > a[data-icon="delete"]').hide();
 		});
+		this.initializeDatabase();
 	},
 	//TODO: Implement with server. Note: Server should return only +-100 last news.
 	getLastNewsFromServer: function(teamId) {
@@ -217,8 +213,68 @@ var tooskiTeams = {
 		this.showListEventsFromDB(teamId);
 	},
 	
+	hasPhotosInDB: function() {
+		if (this.storage.hasPhotosInDB) {
+			return true;
+		}
+		return false;
+	},
+	
+	generatePhotoGallery: function(teamId)  {
+		this.db.transaction(function(tx) {
+			tx.executeSql('SELECT * FROM photos WHERE idTeam=? ORDER BY date DESC', 
+			[teamId],
+			function(tx, rs) {
+				var html='<center><div id="photoGallery" class="gallery">';
+				for (var i=0; i < rs.rows.length; i++) {
+					html += '<a href="'+$.cloudinary.url(rs.rows.item(i).filename)+'"><img src="'+$.cloudinary.url(rs.rows.item(i).filename,{width:300, crop:'fill'})+'" width="150px" alt="'+rs.rows.item(i).description+'" /></a>&nbsp;&nbsp;&nbsp;';
+				}
+				html += '</div></center>';
+				$('#photoLibrary').html(html);
+				$("#photoLibrary a").photoSwipe({
+					enableMouseWheel: false , 
+					enableKeyboard: false ,
+					jQueryMobile: true,
+					loop:false
+				});
+			},
+			this.dbError);
+		});
+	},
+	
+	openNewUploadImageScreen: function(teamId) {
+		alert('Upload Screen'+teamId);
+	},
+	
+	preparePhotoPage: function(teamId) {
+		$('#content').html('<div id="photoUpload"><center><a onClick="tooskiTeams.openNewUploadImageScreen('+teamId+');" href="" data-role="button">Partager mes photos</a></center></div><hr size="2px" width="100%" /><div id="photoLibrary"></div>');
+	},
+	//TODO: Implement with server connection. Should only return <= 100 results.
+	getLastPhotosFromServer: function(teamId) {
+		return '{"photo":[{"id":"1", "filename":"test.jpg", "description":"La première Photo", "date":"1357133799"}, {"id":"2", "filename":"test2.jpg", "description":"La deuxième photo", "date":"1357133815"}, {"id":"3", "filename":"test.jpg", "description":"La troisième Photo", "date":"1357133828"}, {"id":"4", "filename":"test4.jpg", "description":"La troisième Photo", "date":"1357133828"}, {"id":"5", "filename":"test5.jpg", "description":"La troisième Photo", "date":"1357133828"}, {"id":"6", "filename":"test6.jpg", "description":"La troisième Photo", "date":"1357133828"}]}';
+	},
+	
+	getPhotoListIntoDB: function(teamId) {
+		var photosJson = this.getLastPhotosFromServer(teamId);
+		var obj = $.parseJSON(photosJson);
+		this.db.transaction(function(tx) {
+			for (var i=0; i < obj.photo.length; i++) {
+				tx.executeSql('INSERT OR REPLACE INTO photos(id, idTeam, filename, description, date) VALUES (?, ?, ?, ?, ?)',
+				[obj.photo[i].id, teamId, obj.photo[i].filename, obj.photo[i].description, obj.photo[i].date],
+				function(){},
+				this.dbError);
+			}
+		});
+		//TODO: Uncomment: this.storage.hasPhotosInDB = true;
+	},
+	
 	loadTeamPhoto: function(teamId) {
-		alert('Photos');
+		this.preparePhotoPage(teamId);
+		if (this.hasPhotosInDB()) {
+			this.generatePhotoGallery(teamId);
+		}
+		this.getPhotoListIntoDB(teamId);
+		this.generatePhotoGallery(teamId);
 	},
 	
 	selectTeam: function(teamId) {
@@ -245,7 +301,6 @@ var tooskiTeams = {
 					else {
 						html += '<div id="panel-team-'+rs.rows.item(i).id+'" onClick="tooskiTeams.selectTeam('+rs.rows.item(i).id+');" style="padding-left:5px;border-bottom:solid black 2px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:10px;padding-bottom:8px;margin-top:0px;margin-bottom:0px;"><img src="'+rs.rows.item(i).logo+'" style="max-height:30px;max-width:75px;margin-right:10px;vertical-align:middle;" />'+rs.rows.item(i).name+'</h4></div>';
 					}
-					
 				}
 				$('#panel').append(html);
 			},
@@ -296,19 +351,30 @@ var tooskiTeams = {
 	},
 	
 	initializeDatabase: function() {
-		this.db = openDatabase('teamDB', '1.0', 'The Tooski Team App Database', 65536);
-		this.db.transaction(function(tx){
+		tooskiTeams.db.transaction(function(tx){
 			tx.executeSql('CREATE TABLE IF NOT EXISTS teams(id INTEGER PRIMARY KEY ASC, name TEXT, logo TEXT, email TEXT)', [],function(){} ,this.dbError);
+		});
+		tooskiTeams.db.transaction(function(tx){
 			tx.executeSql('CREATE TABLE IF NOT EXISTS news(id INTEGER PRIMARY KEY ASC, idTeam TEXT, title TEXT, text TEXT, date TEXT)', [],function(){} ,this.dbError);
-			tx.executeSql('CREATE UNIQUE INDEX news_idx ON news(id))', [],function(){} ,this.dbError);
+		});
+		tooskiTeams.db.transaction(function(tx){
+			tx.executeSql('CREATE TABLE IF NOT EXISTS photos(id INTEGER PRIMARY KEY ASC, idTeam TEXT, filename TEXT, description TEXT, date TEXT)', [],function(){} ,this.dbError);
+			
+		});
+		tooskiTeams.db.transaction(function(tx){
 			tx.executeSql('CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY ASC, idTeam TEXT, title TEXT, description TEXT, date TEXT, place TEXT, file TEXT)', [],function(){} ,this.dbError);
+			
+		});
+		tooskiTeams.db.transaction(function(tx) {
+			tx.executeSql('CREATE UNIQUE INDEX news_idx ON news(id))', [],function(){} ,this.dbError);
 			tx.executeSql('CREATE UNIQUE INDEX events_idx ON events(id))', [],function(){} ,this.dbError);
+			tx.executeSql('CREATE UNIQUE INDEX photos_idx ON photos(id))', [],function(){} ,this.dbError);
 		});
 	},
 	
 	getTeamSettings: function() {
-		var teamJson = this.getTeamFromServer();
 		this.initializeDatabase();
+		var teamJson = this.getTeamFromServer();
 		this.storeTeamsInDatabase(teamJson);
 	},
 	

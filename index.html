@@ -2,8 +2,10 @@
 <html> 
 	<head> 
 		<title>Tooski Teams</title> 
-		<meta name="viewport" content="width=device-width, initial-scale=1"> 
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="author" content="Sébastien Arnold - www.Tooski.ch" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<link rel="stylesheet" href="css/jquery.mobile.css" />
 		<link rel="stylesheet" href="css/teams.css" />
 	</head> 
@@ -33,15 +35,19 @@
 		</div><!-- /page -->
 		<script type="text/javascript" src="js/jquery.js"></script>
 		<script type="text/javascript" src="js/teams.js"></script>
+		<script type="text/javascript" src="js/photoswipe.js"></script>
 		<script type="text/javascript" >
-			 $(document).bind( "mobileinit", function(){
-        $.support.cors = true;
-        $.mobile.allowCrossDomainPages = true;       
-    });
+			$(document).bind( "mobileinit", function(){
+        		$.support.cors = true;
+        		$.mobile.allowCrossDomainPages = true;       
+    		});
 			window.onload = function() {
 				//Function to launch when app is first started.
 				tooskiTeams.init();
 			}
+			$(document).ready(function() {	
+					$.cloudinary.config("cloud_name", "tooski");
+				});
 		</script>
 	</body>
 </html>
