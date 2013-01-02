@@ -1,0 +1,46 @@
+<!DOCTYPE html> 
+<html> 
+	<head> 
+		<title>Tooski Teams</title> 
+		<meta name="viewport" content="width=device-width, initial-scale=1"> 
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link rel="stylesheet" href="css/jquery.mobile.css" />
+	</head> 
+	<body>
+		<div data-role="page" id="page">
+						
+			<div data-role="panel" id="panel" data-position="left">
+				Si vous pouvez lire, ça, c'est qu'il y a eu une erreur quelque part...
+			</div>
+			
+			<div data-role="header" data-id="topBar">
+				<a href="#panel" data-rel="panel" data-corners="false" data-icon="grid">Menu</a>
+				<h1>Tooski Teams</h1>
+				
+				<div data-role="navbar">
+					<ul>
+						<li><a href="#">News</a></li>
+						<li><a href="#">Photos</a></li>
+						<li><a href="#">Calendrier</a></li>
+					</ul>
+				</div>
+			</div><!-- /header -->
+			
+			<div data-role="content" id="content">
+			</div><!-- /content -->
+			
+		</div><!-- /page -->
+		<script type="text/javascript" src="js/jquery.js"></script>
+		<script type="text/javascript" src="js/teams.js"></script>
+		<script type="text/javascript" >
+			 $(document).bind( "mobileinit", function(){
+        $.support.cors = true;
+        $.mobile.allowCrossDomainPages = true;       
+    });
+			window.onload = function() {
+				//Function to launch when app is first started.
+				tooskiTeams.init();
+			}
+		</script>
+	</body>
+</html>
