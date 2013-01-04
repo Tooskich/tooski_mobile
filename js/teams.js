@@ -70,7 +70,6 @@ var tooskiTeams = {
 			$.mobile.changePage('#loginPage');
 			$('div[data-role="header"] > a[data-icon="delete"]').hide();
 		});
-		this.initializeDatabase();
 	},
 
 	//TODO: Implement server side.
@@ -78,33 +77,30 @@ var tooskiTeams = {
 		tooskiTeams.makeRequest('news', {
 			id: this.storage.keyId,
 			team: teamId
-		}, function (data, teamId) {
-			tooskiTeams.storage.news = data.responseText;
+		}, function (data) {
+			var json = tooskiTeams.decrypt(data.responseText, tooskiTeams.storage.secret);
+			var db = $.parseJSON(tooskiTeams.storage.db);
+			db.team[teamId].news = json;
+			tooskiTeams.storage.db = JSON.stringify(db);
 			tooskiTeams.showListNewsFromDb(teamId);
 			//TODO: Uncomment: this.storage.hasNewsInDB = true;
 		}); 
-		//'{"news": [{"title":"Première", "id":"1", "date":"1356889379", "text":"Dernière à afficher. Elle contient une image: <br /><img src=\'http://tooski.ch/assets/uploads/files/header.png\' />" },{"title":"Deuxième", "id":"2", "date":"1356889441", "text":"Mais première à être affichée." },{"title":"Troisième", "id":"3", "date":"1356889421", "text":"Mais c\'est celle du milieu." }]}';
 	},
 	
-	showNews: function(newsId) {
-		this.db.transaction(function(tx) {
-			tx.executeSql('SELECT * FROM news WHERE id=?', 
-			[newsId],
-			function(tx, rs) {
-				news = rs.rows.item(0);
-				tooskiTeams.change('news', function(){
-					var date = new Date(news.date * 1000);
-					$('#newsTitle').html(news.title);
-					$('#newsDate').html(date.getDate()+'.'+date.getMonth()+'.'+date.getFullYear()+' à '+date.getHours()+':'+date.getMinutes());
-					$('#newsContent').html(news.text);
-				});
-			},
-			tooskiTeams.dbError
-			);
+	showNews: function(newsId, teamId) {
+		var team = $.parseJSON(tooskiTeams.storage.db).team[teamId];
+		var news = $.parseJSON(team.news).news;
+		news = $.grep(news, function(n, i) {return parseInt(tooskiTeams.urldecode(n.id)) == parseInt(newsId);});
+		news = news[0];
+		tooskiTeams.change('news', function(){
+			var date = new Date(tooskiTeams.urldecode(news.date) * 1000);
+			$('#newsTitle').html(tooskiTeams.urldecode(news.title));
+			$('#newsDate').html(date.getDate()+'.'+date.getMonth()+'.'+date.getFullYear()+' à '+date.getHours()+':'+date.getMinutes());
+			$('#newsContent').html(tooskiTeams.urldecode(news.text));
 		});
 	},
 	
-	createTeamNewsPreview: function(title, text, id) {
+	createTeamNewsPreview: function(title, text, id, teamId) {
 		if (text.indexOf('<img') != -1) {
 			var image = text.substring(text.indexOf('<img'));
 			image = image.substring(0, image.indexOf('>')+1);
@@ -122,28 +118,33 @@ var tooskiTeams = {
 			div.innerHTML = text;
 			var content = '<p align="justify">'+(div.textContent || div.innerText || "").substring(0, 300)+'...'+'</p>';
 		}
-		return '<div onclick="tooskiTeams.showNews('+id+');" class="team-news-div-preview"><div><h2 style="margin:0px;padding:5px;">'+title+'</h2></div><div>'+content+'</div></div>';
+		return '<div onclick="tooskiTeams.showNews('+id+', '+teamId+');" class="team-news-div-preview"><div><h2 style="margin:0px;padding:5px;">'+title+'</h2></div><div>'+content+'</div></div>';
 	},
 	
 	sortByDate: function (a, b) {
-		if (parseInt(tooskiTeams.decrypt(a.date, tooskiTeams.storage.secret)) > parseInt(tooskiTeams.decrypt(b.date, tooskiTeams.storage.secret))) {
+		if (parseInt(a.date) > parseInt(b.date)) {
 			return -1;
 		}
-		if (parseInt(tooskiTeams.decrypt(a.date, tooskiTeams.storage.secret)) < parseInt(tooskiTeams.decrypt(b.date, tooskiTeams.storage.secret))) {
+		if (parseInt(a.date) < parseInt(b.date)) {
 			return 1;
 		}
 		return 0
 	},
 	
+	urldecode: function(url) {
+  		return decodeURIComponent(url.replace(/\+/g, ' '));
+	},
+	
 	showListNewsFromDb: function(teamId) {
-		var obj = $.parseJSON(this.storage.news);
+		var obj = $.parseJSON(this.storage.db);
+		var obj = $.parseJSON(obj.team[teamId].news);
 		obj.news.sort(this.sortByDate);
 		var html = '<center>';
 		for (var i=0; i < obj.news.length && i < tooskiTeams.nbNewsToShow; i++) {
-			var title = this.decrypt(obj.news[i].title, this.storage.secret);
-			var text = this.decrypt(obj.news[i].text, this.storage.secret);
-			var id = this.decrypt(obj.news[i].id, this.storage.secret);
-			html += tooskiTeams.createTeamNewsPreview(title, text, id);
+			var title = this.urldecode(obj.news[i].title);
+			var text = this.urldecode(obj.news[i].text);
+			var id = this.urldecode(obj.news[i].id);
+			html += tooskiTeams.createTeamNewsPreview(title, text, id, teamId);
 		}
 		html += '</center>';
 		$('#content').html(html);
@@ -298,24 +299,21 @@ var tooskiTeams = {
 	
 	generateTeamMenu: function() {
 		$('#panel').html('<h3 style="margin-bottom:0px;margin-top:10px;margin-left:15px;" align="center">Teams</h3><hr style="maring-left:5px;" align="center" height="10px" width="90%" /><hr color="black" size="2px" width="100%" style="margin-bottom:0px;">');
-		this.db.transaction(function(tx) {
-			tx.executeSql('SELECT * FROM teams',
-			[],
-			function(tx, rs){
-				var html = '';
-				for (var i=0; i < rs.rows.length; i++) {
-					if (i == 0) {
-						html += '<div id="panel-team-'+rs.rows.item(i).id+'" onClick="tooskiTeams.selectTeam('+rs.rows.item(i).id+');" style="padding-left:5px;border-bottom:solid black 2px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:16px;padding-bottom:12px;margin-top:0px;margin-bottom:0px;"><img src="'+rs.rows.item(i).logo+'" style="max-height:30px;max-width:75px;margin-right:10px;vertical-align:middle;" />'+rs.rows.item(i).name+'</h4></div>';
-					}
-					else {
-						html += '<div id="panel-team-'+rs.rows.item(i).id+'" onClick="tooskiTeams.selectTeam('+rs.rows.item(i).id+');" style="padding-left:5px;border-bottom:solid black 2px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:10px;padding-bottom:8px;margin-top:0px;margin-bottom:0px;"><img src="'+rs.rows.item(i).logo+'" style="max-height:30px;max-width:75px;margin-right:10px;vertical-align:middle;" />'+rs.rows.item(i).name+'</h4></div>';
-					}
+		var team = $.parseJSON(tooskiTeams.storage.db).team;
+		var html = '';
+		var min = false;
+		for (var i=0; i < team.length; i++) {
+			if (team[i]) {
+				if (!min) {
+					min = !min;
+					html += '<div id="panel-team-'+team[i].id+'" onClick="tooskiTeams.selectTeam('+team[i].id+');" style="padding-left:5px;border-bottom:solid black 2px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:16px;padding-bottom:12px;margin-top:0px;margin-bottom:0px;"><img src="'+team[i].logo+'" style="max-height:30px;max-width:75px;margin-right:10px;vertical-align:middle;" />'+team[i].name+'</h4></div>';
 				}
-				$('#panel').append(html);
-			},
-			tooskiTeams.dbError
-			);
-		});
+				else {
+					html += '<div id="panel-team-'+team[i].id+'" onClick="tooskiTeams.selectTeam('+team[i].id+');" style="padding-left:5px;border-bottom:solid black 2px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:10px;padding-bottom:8px;margin-top:0px;margin-bottom:0px;"><img src="'+team[i].logo+'" style="max-height:30px;max-width:75px;margin-right:10px;vertical-align:middle;" />'+team[i].name+'</h4></div>';
+				}
+			}
+		}
+		$('#panel').append(html);
 	},
 	
 	dbError: function(tx, e) {
@@ -342,29 +340,29 @@ var tooskiTeams = {
 	},
 	//TODO: Implement with this.makeRequest and server side.
 	getTeamFromServer: function() {
-		return '{"length":3, "name":["Tooski Team", "Ski-Romand Junior", "Guggen"],"id":["6", "10", "11"], "logo":["http://tooski.ch/assets/uploads/files/header.png", "http://www.ski-romand.ch/themes/skiromand-2/templates/logo.png", "http://seba1511.com/LogoTooskiTeam/image.php?w=187&h=73&t=Guggenmusik"], "email":["info@tooski.ch", "pokerstar1511@gmail.com", "test@test.com"] }';
-	},
-	
-	storeTeamsInDatabase: function(teamJson) {
-		var team = $.parseJSON(teamJson);
-		this.db.transaction(function(tx){
-			for (var i=0; i<team.length; i++) {
-				tx.executeSql('INSERT INTO teams(id, name, logo, email) VALUES (?, ?, ?, ?)',
-					[team.id[i], team.name[i], team.logo[i], team.email[i]],
-					function() {},
-					this.dbError
-				);
-			}
+		this.makeRequest('team', {
+			id: tooskiTeams.storage.keyId
+		}, function(data){
+			var json = tooskiTeams.decrypt(data.responseText, tooskiTeams.storage.secret);
+			var obj = $.parseJSON(json);
+			var db = {team: []};
+			$.each(obj.team, function(i, item) {
+				db.team[parseInt(item.id)] = {
+					logo: tooskiTeams.urldecode(item.logo),
+					name: tooskiTeams.urldecode(item.name),
+					email: tooskiTeams.urldecode(item.email),
+					id: item.id
+				};
+			});
+			tooskiTeams.storage.db = JSON.stringify(db);
+			tooskiTeams.generateTeamMenu();
 		});
-		this.storage.hasTeamSettings = true;
+		//return '{"length":3, "name":["Tooski Team", "Ski-Romand Junior", "Guggen"],"id":["6", "10", "11"], "logo":["http://tooski.ch/assets/uploads/files/header.png", "http://www.ski-romand.ch/themes/skiromand-2/templates/logo.png", "http://seba1511.com/LogoTooskiTeam/image.php?w=187&h=73&t=Guggenmusik"], "email":["info@tooski.ch", "pokerstar1511@gmail.com", "test@test.com"] }';
 	},
 	
 	initializeDatabase: function() {
 		tooskiTeams.db.transaction(function(tx){
 			tx.executeSql('CREATE TABLE IF NOT EXISTS teams(id INTEGER PRIMARY KEY ASC, name TEXT, logo TEXT, email TEXT)', [],function(){} ,this.dbError);
-		});
-		tooskiTeams.db.transaction(function(tx){
-			tx.executeSql('CREATE TABLE IF NOT EXISTS news(id INTEGER PRIMARY KEY ASC, idTeam TEXT, title TEXT, text TEXT, date TEXT)', [],function(){} ,this.dbError);
 		});
 		tooskiTeams.db.transaction(function(tx){
 			tx.executeSql('CREATE TABLE IF NOT EXISTS photos(id INTEGER PRIMARY KEY ASC, idTeam TEXT, filename TEXT, description TEXT, date TEXT)', [],function(){} ,this.dbError);
@@ -375,20 +373,16 @@ var tooskiTeams = {
 			
 		});
 		tooskiTeams.db.transaction(function(tx) {
-			tx.executeSql('CREATE UNIQUE INDEX news_idx ON news(id))', [],function(){} ,this.dbError);
 			tx.executeSql('CREATE UNIQUE INDEX events_idx ON events(id))', [],function(){} ,this.dbError);
 			tx.executeSql('CREATE UNIQUE INDEX photos_idx ON photos(id))', [],function(){} ,this.dbError);
 		});
+		var db = {"team": []};
+		tooskiTeams.storage.db = JSON.stringify(db);
 	},
 	
 	getTeamSettings: function() {
 		this.initializeDatabase();
-		var teamJson = this.getTeamFromServer();
-		this.storeTeamsInDatabase(teamJson);
-	},
-	
-	hasTeamSettings: function() {
-		return false;//this.storage.hasTeamSettings;//check in db !
+		this.getTeamFromServer();
 	},
 	
 	/*
@@ -396,12 +390,8 @@ var tooskiTeams = {
 	 */
 	init: function() {
 		this.message('show', 'Chargement en cours...');
-		this.initializeDatabase();
 		if (this.loggedIn()) {
-			if (!this.hasTeamSettings()) {
-				this.getTeamSettings();
-			}
-			this.generateTeamMenu();
+			this.getTeamSettings();
 			this.getWelcomePage();
 		}
 		else {
