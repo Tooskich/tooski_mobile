@@ -6,22 +6,23 @@
 		<meta name="author" content="Sébastien Arnold - www.Tooski.ch" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<link rel="stylesheet" href="css/jquery.mobile.css" />
+		<link rel="stylesheet" href="css/tooski.css" />
+		<link rel="stylesheet" href="css/structure.css" />
 		<link rel="stylesheet" href="css/teams.css" />
 	</head> 
 	<body>
 		<div data-role="page" id="page">
 						
-			<div data-role="panel" id="panel" data-position="left">
+			<div data-role="panel" id="panel" data-position="left" data-theme="a">
 				Si vous pouvez lire, ça, c'est qu'il y a eu une erreur quelque part...
 			</div>
 			
-			<div data-role="header" data-id="topBar">
+			<div data-role="header" data-id="topBar" data-theme="a">
 				<a href="#panel" data-rel="panel" data-corners="false" data-icon="grid">Menu</a>
 				<h1>Tooski Teams</h1>
 				
-				<div data-role="navbar">
-					<ul>
+				<div data-role="navbar" data-theme="a">
+					<ul data-theme="a">
 						<li><a href="#" id="menu-news">News</a></li>
 						<li><a href="#" id="menu-photos">Photos</a></li>
 						<li><a href="#" id="menu-calendar">Calendrier</a></li>
@@ -29,7 +30,7 @@
 				</div>
 			</div><!-- /header -->
 			
-			<div data-role="content" id="content">
+			<div data-role="content" id="content" data-theme="a">
 			</div><!-- /content -->
 			
 		</div><!-- /page -->
