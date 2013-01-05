@@ -177,17 +177,17 @@ var tooskiTeams = {
 	},
 	
 	getEventsIntoDB: function(teamId) {
-		var eventsJson = this.getLastEventsFromServer(teamId);
-		var obj = $.parseJSON(eventsJson);
-		this.db.transaction(function(tx) {
-			for (var i=0; i < obj.event.length; i++) {
-				tx.executeSql('INSERT OR REPLACE INTO events(id, idTeam, title, description, date, place, file) VALUES (?, ?, ?, ?, ?, ?, ?)',
-				[obj.event[i].id, teamId, obj.event[i].title, obj.event[i].description, obj.event[i].date, obj.event[i].place, obj.event[i].file],
-				function(){},
-				this.dbError);
-			}
+		this.makeRequest('events', {
+			id: tooskiTeams.storage.keyId,
+			team: teamId
+		}, function(data) {
+			var json = tooskiTeams.decrypt(data.responseText, tooskiTeams.storage.secret);
+			var db = $.parseJSON(tooskiTeams.storage.db);
+			db.team[teamId].events = json;
+			tooskiTeams.storage.db = JSON.stringify(db);
+			tooskiTeams.showListEventsFromDb(teamId);
+			//TODO: Uncomment: this.storage.hasEventsInDB = true;
 		});
-		//TODO: Uncomment: this.storage.hasEventsInDB = true;
 	}, 
 	
 	createTeamEventView: function(title, description, date, place, file) {
@@ -196,21 +196,22 @@ var tooskiTeams = {
 		return '<div class="eventContainer"><div class="eventHeader"><h2 align="left" class="eventHeaderTitle">'+title+'</h2><p align="right" class="eventHeaderDate">'+date+'</p></div><div class="eventContent"><p align="justify">'+description+'</p></div><div class="eventFooter"><table width="100%"><tr><td><h3>Quand</h3><p>'+date+'</p></td><td><h3>Où</h3><p>'+place+'</p></td><td><h3>Infos</h3><p><a data-role="button" data-icon="info" data-inline="true" data-mini="true" href="'+file+'">Télécharger</a></p></td></tr></table></div></div>';
 	},
 	
-	showListEventsFromDB: function(teamId) {
-		this.db.transaction(function(tx) {
-			tx.executeSql('SELECT * FROM events WHERE idTeam=? ORDER BY date DESC', 
-			[teamId],
-			function(tx, rs) {
-				var html='<center>';
-				for (var i=0; i < tooskiTeams.nbEventsToShow && i < rs.rows.length; i++) {
-					html += tooskiTeams.createTeamEventView(rs.rows.item(i).title, rs.rows.item(i).description, rs.rows.item(i).date, rs.rows.item(i).place, rs.rows.item(i).file);
-				}
-				html += '</center>';
-				$('#content').html(html);
-				$('#content').trigger('create');
-			},
-			this.dbError);
-		});
+	showListEventsFromDb: function(teamId) {
+		var obj = $.parseJSON(this.storage.db);
+		var obj = $.parseJSON(obj.team[teamId].events);
+		obj.event.sort(this.sortByDate);
+		var html = '<center>';
+		for (var i=0; i < obj.event.length && i < tooskiTeams.nbEventsToShow; i++) {
+			var title = this.urldecode(obj.event[i].title);
+			var description = this.urldecode(obj.event[i].description);
+			var date = this.urldecode(obj.event[i].date);
+			var place = this.urldecode(obj.event[i].place);
+			var file = this.urldecode(obj.event[i].file);
+			html += tooskiTeams.createTeamEventView(title, description, date, place, file);
+		}
+		html += '</center>';
+		$('#content').html(html);
+		$('#content').trigger('create');
 	},
 	
 	loadTeamCalendar: function(teamId) {
@@ -218,7 +219,7 @@ var tooskiTeams = {
 			this.showListEventsFromDB(teamId);
 		}
 		this.getEventsIntoDB(teamId);
-		this.showListEventsFromDB(teamId);
+		this.showListEventsFromDb(teamId);
 	},
 	
 	hasPhotosInDB: function() {
@@ -229,7 +230,25 @@ var tooskiTeams = {
 	},
 	
 	generatePhotoGallery: function(teamId)  {
-		this.db.transaction(function(tx) {
+		var obj = $.parseJSON(this.storage.db);
+		var obj = $.parseJSON(obj.team[teamId].photos);
+		obj.photo.sort(this.sortByDate);
+		var html = '<center>';
+		for (var i=0; i < obj.photo.length; i++) {
+			var filename = this.urldecode(obj.photo[i].filename);
+			var description = this.urldecode(obj.photo[i].description);
+			html += '<a class="imgContainer" href="'+$.cloudinary.url(filename)+'"><img src="'+$.cloudinary.url(filename,{width:300, crop:'fill'})+'" width="150px" alt="'+description+'" /></a>';
+		}
+		html += '</center>';$('#photoLibrary').html(html);
+		$('#loader').trigger('create');
+		$("#photoLibrary a").photoSwipe({
+			enableMouseWheel: false , 
+			enableKeyboard: false ,
+			jQueryMobile: true,
+			loop:false
+		});
+		$('#content').trigger('create');
+		/*this.db.transaction(function(tx) {
 			tx.executeSql('SELECT * FROM photos WHERE idTeam=? ORDER BY date DESC', 
 			[teamId],
 			function(tx, rs) {
@@ -248,7 +267,7 @@ var tooskiTeams = {
 				});
 			},
 			this.dbError);
-		});
+		});*/
 	},
 	
 	openNewUploadImageScreen: function(teamId) {
@@ -259,13 +278,20 @@ var tooskiTeams = {
 		$('#content').html('<div id="photoUpload"><center><button href="#" data-role="button" data-icon="plus" onClick="tooskiTeams.openNewUploadImageScreen('+teamId+');" >Ajouter des Photos</button></center></div><br /><hr size="2px" width="100%" /><h3>Galerie Photo</h3><div id="photoLibrary"></div>');
 		$('#content').trigger('create');
 	},
-	//TODO: Implement with server connection. Should only return <= 100 results.
-	getLastPhotosFromServer: function(teamId) {
-		return '{"photo":[{"id":"1", "filename":"test.jpg", "description":"La première Photo", "date":"1357133799"}, {"id":"2", "filename":"test2.jpg", "description":"La deuxième photo", "date":"1357133815"}, {"id":"3", "filename":"test.jpg", "description":"La troisième Photo", "date":"1357133828"}, {"id":"4", "filename":"test4.jpg", "description":"La troisième Photo", "date":"1357133828"}, {"id":"5", "filename":"test5.jpg", "description":"La troisième Photo", "date":"1357133828"}, {"id":"6", "filename":"test6.jpg", "description":"La troisième Photo", "date":"1357133828"}]}';
-	},
 	
 	getPhotoListIntoDB: function(teamId) {
-		var photosJson = this.getLastPhotosFromServer(teamId);
+		tooskiTeams.makeRequest('photo', {
+			id: tooskiTeams.storage.keyId,
+			team: teamId
+		}, function (data) {
+			var json = tooskiTeams.decrypt(data.responseText, tooskiTeams.storage.secret);
+			var db = $.parseJSON(tooskiTeams.storage.db);
+			db.team[teamId].photos = json;
+			tooskiTeams.storage.db = JSON.stringify(db);
+			tooskiTeams.generatePhotoGallery(teamId);
+			//TODO: Uncomment: this.storage.hasPhotosInDB = true;
+		});
+		/*var photosJson = this.getLastPhotosFromServer(teamId);
 		var obj = $.parseJSON(photosJson);
 		this.db.transaction(function(tx) {
 			for (var i=0; i < obj.photo.length; i++) {
@@ -274,7 +300,7 @@ var tooskiTeams = {
 				function(){},
 				this.dbError);
 			}
-		});
+		});*/
 		//TODO: Uncomment: this.storage.hasPhotosInDB = true;
 	},
 	
@@ -288,13 +314,15 @@ var tooskiTeams = {
 	},
 	
 	selectTeam: function(teamId) {
-		$('[id*="panel-team-"]').css('background-color', '');
-		$('#panel-team-'+teamId).css('background-color', '#2cabec');
+		$('[id*="panel-team-"]').removeClass('selectedTeam');
+		$('#panel-team-'+teamId).addClass('selectedTeam');
 		$('#panel').panel('close', {display: 'reveal'});
+		$('#content').scrollTop();
+		$('#tabs').removeClass('invisible');
 		$('#menu-news').attr('onclick', 'tooskiTeams.loadTeamNews('+teamId+')');
 		$('#menu-photos').attr('onclick', 'tooskiTeams.loadTeamPhoto('+teamId+')');
 		$('#menu-calendar').attr('onclick', 'tooskiTeams.loadTeamCalendar('+teamId+')');
-		this.loadTeamNews(teamId);
+		$('#menu-news').trigger('click');
 	},
 	
 	generateTeamMenu: function() {

@@ -1,3 +1,16 @@
+h2, h3, h4, h5, h6 {
+	color:#2cabec;
+}
+p {
+	text-align:justify;
+}
+.selectedTeam {
+	background-color:#2cabec;
+}
+.selectedTeam > h4 {
+	color:white;
+	text-shadow:none;
+}
 .team-news-div-preview, .eventContainer {
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
@@ -9,11 +22,25 @@
   	-moz-box-shadow: 0px 0px 5px #000000;
   	box-shadow: 0px 0px 5px #000000;
 }
+.invisible {
+	display:none;
+}
 .newsContent {
 	margin:5%;
 }
 .eventContent {
+	padding-top:10px;
+	padding-bottom:10px;
 	margin:5px;
+	background-color: #EEE;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	color: #333;
+}
+.eventHeaderDate {
+	text-align:right;
 }
 .eventHeaderTitle, .eventHeaderDate {
 	margin:0px;
