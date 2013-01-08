@@ -5,8 +5,8 @@ var tooskiTeams = {
 	//TODO: change this line:
 	base_url: '',
 	storage: localStorage,
-	nbNewsToShow: 25,
-	nbEventsToShow: 25,
+	nbNewsToShow: 1000,
+	nbEventsToShow: 1000,
 	
 	
 	makeRequest: function(page, object, cbFunction) {
@@ -42,10 +42,13 @@ var tooskiTeams = {
 			if (response.state == 1) {
 				$('#loginMessage').html('<center><p><i><font color="green">'+response.message+'</font></i></p></center>');
 				tooskiTeams.storage.keyId = response.id;
-				$(document).bind('pagechange', function() {
+				/*$(document).bind('pagechange', function() {
 					tooskiTeams.init();
 				});
-				$.mobile.changePage('index.html', {reloadPage:true, allowSamePageTransition:true});
+				$.mobile.changePage('#page');//, {reloadPage:true, allowSamePageTransition:true});
+				tooskiTeams.init();*/
+				$.mobile.changePage('index.html');
+				window.location.reload();
 			}
 			else if (response.state == 0) {
 				$('#loginMessage').html('<center><p><i><font color="red">'+response.message+'</font></i></p></center>');
@@ -61,7 +64,7 @@ var tooskiTeams = {
 	},
 	
 	loadLoginPage: function() {
-		$.mobile.changePage('#login');
+		$.mobile.changePage('#login',{role:'dialog'});
 		$('div[data-role="header"] > a[data-icon="delete"]').hide();
 	},
 
@@ -243,12 +246,12 @@ var tooskiTeams = {
 		$('#content').trigger('create');
 	},
 	
-	selectPicture: function() {
-		navigator.camera.getPicture( tooskiTeams.setAttributePicture, tooskiTeams.cameraError, {destinationType: navigator.camera.DestinationType.FILE_URI} );
+	selectPicture: function(src) {
+		navigator.camera.getPicture( tooskiTeams.setAttributePicture, tooskiTeams.cameraError, {destinationType: navigator.camera.DestinationType.FILE_URI, sourceType: src} );
 	},
 	
-	openNewUploadImageScreen: function(teamId) {
-		$('#photoUpload').html('<a onClick="tooskiTeams.selectPicture();" id="pictureSelection" data-role="button">Choisir une Photo</a><br /><input type="text" id="description" placeholder="Description de la photo" /><br /><div data-role="fieldcontain">Photo réservée à la Team ?&nbsp;&nbsp;&nbsp;<select name="private" id="private" data-role="slider"><option value="0">Non</option><option value="1">Oui</option></select></div><br /><input type="button" data-role="button" value="Envoyer l\'image" onClick="tooskiTeams.sendImageToServer('+teamId+')" />');
+	openNewUploadImageScreen: function(teamId, src) {
+		$('#photoUpload').html('<a onClick="tooskiTeams.selectPicture(\''+src+'\');" id="pictureSelection" data-role="button">Choisir une Photo</a><br /><input type="text" id="description" placeholder="Description de la photo" /><br /><div data-role="fieldcontain">Photo réservée à la Team ?&nbsp;&nbsp;&nbsp;<select name="private" id="private" data-role="slider"><option value="0">Non</option><option value="1">Oui</option></select></div><br /><input type="button" data-role="button" value="Envoyer l\'image" onClick="tooskiTeams.sendImageToServer('+teamId+')" />');
 		$('#content').trigger('create');
 	},
 	
@@ -264,7 +267,7 @@ var tooskiTeams = {
 		var private = $('#private').val();
 		var description= $('#description').val();
 		var imageURI = $('#pictureSelection').attr('picture');
-		if ((typeof imageURI = 'undefined') || imageURI = '') {
+		if ((typeof imageURI == 'undefined') || imageURI == '') {
 			navigator.notification.alert('Sélectionnez une image s.v.p.');
 			return false;
 		}
@@ -283,13 +286,14 @@ var tooskiTeams = {
         	var ft = new FileTransfer();
         	ft.upload(imageURI, tooskiTeams.ServerUrl+"sendImage.php", function(r) {
         	    navigator.notification.alert(r.response);
+        	    tooskiTeams.getPhotoListIntoDB(teamId);
         	}, function(error) {
         	    alert("An error has occurred: Code = " = error.code);
         	}, options);
 	},
 	
 	preparePhotoPage: function(teamId) {
-		$('#content').html('<div id="photoUpload"><center><button href="#" data-role="button" data-icon="plus" onClick="tooskiTeams.openNewUploadImageScreen('+teamId+');" >Ajouter des Photos</button></center></div><br /><hr size="2px" width="100%" /><h3>Galerie Photo</h3><div id="photoLibrary"></div>');
+		$('#content').html('<div id="photoUpload"><center><fieldset class="ui-grid-a resp-grid"><div class="ui-block-a"><button href="#" data-role="button" data-icon="plus" onClick="tooskiTeams.openNewUploadImageScreen('+teamId+', \'navigator.camera.PictureSourceType.PHOTOLIBRARY\');" >Choisir une Photo&nbsp;&nbsp;<img src="images/photos.png" height="15px" /></button></div><div class="ui-block-b"><button href="#" data-role="button" data-icon="plus" onClick="tooskiTeams.openNewUploadImageScreen('+teamId+', \'navigator.camera.PictureSourceType.CAMER\');" >Prendre une Photo&nbsp;&nbsp;<img src="images/photoup.png" height="15px" /></button></div></fieldset></center></div><br /><hr size="2px" width="100%" /><h3>Galerie Photo</h3><div id="photoLibrary"></div>');
 		$('#content').trigger('create');
 	},
 	
@@ -321,7 +325,9 @@ var tooskiTeams = {
 		$('[id*="panel-team-"]').removeClass('selectedTeam');
 		$('#panel-team-'+teamId).addClass('selectedTeam');
 		$('#panel').panel('close', {display: 'reveal'});
-		$('#content').scrollTop();
+		$(document).scrollTop();
+		var name = $.parseJSON(tooskiTeams.storage.db).team[teamId].name;
+		$('#header h1').text(name);
 		$('#tabs').removeClass('invisible');
 		$('#menu-news').attr('onclick', 'tooskiTeams.loadTeamNews('+teamId+')');
 		$('#menu-photos').attr('onclick', 'tooskiTeams.loadTeamPhoto('+teamId+')');
@@ -345,7 +351,13 @@ var tooskiTeams = {
 				}
 			}
 		}
+		html += '<br /><br /><br /><h3 style="margin-bottom:0px;margin-top:10px;margin-left:15px;" align="center">Options</h3><hr style="maring-left:5px;" align="center" height="10px" width="90%" /><hr color="black" size="2px" width="100%" style="margin-bottom:0px;"><div id="panel-team-logout" onClick="tooskiTeams.logout();" style="padding-left:5px;border-bottom:solid black 2px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:16px;padding-bottom:12px;margin-top:0px;margin-bottom:0px;"><img src="images/power@2x.png" style="max-height:30px;max-width:50px;margin-right:10px;vertical-align:middle;" />Se déconnecter</h4></div>';
 		$('#panel').append(html);
+	},
+	
+	logout: function() {
+		tooskiTeams.storage.clear();
+		tooskiTeams.loadLoginPage();
 	},
 	
 	dbError: function(tx, e) {
@@ -413,6 +425,7 @@ var tooskiTeams = {
 	 * The first function to be called when the app is started.
 	 */
 	init: function() {
+		alert('init');
 		tooskiTeams.message('show', 'Chargement en cours...');
 		if (tooskiTeams.loggedIn()) {
 			if (!tooskiTeams.hasTeamSettings()) {

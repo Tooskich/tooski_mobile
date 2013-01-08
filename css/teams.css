@@ -4,6 +4,28 @@ h2, h3, h4, h5, h6 {
 p {
 	text-align:justify;
 }
+#header {
+     position: fixed;
+     top: 0;
+     left: 0;
+     width: 100%;
+     z-index:500;
+}
+#content {
+	padding-top:50px;
+	position:relative;
+	top:50px;
+}
+@media all and (max-width: 25em) {
+	.resp-grid .ui-block-a, 
+	.resp-grid .ui-block-b, 
+	.resp-grid .ui-block-c,
+	.resp-grid .ui-block-d,
+	.resp-grid .ui-block-e { 
+		width: 100%; 
+		float:none; 
+	}
+}
 .eventFooter table, .eventFooter td, .eventFooter td, .eventFooter td p, .eventFooter td h3 {
 	text-align:center;
 	margin:3px;
@@ -55,6 +77,30 @@ p {
 }
 .imgContainer {
 	margin:5px;
+}
+
+/*From Tooski.ch to style the news*/
+.resultTable{
+	border:solid black 1px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	border-radius: 20px;
+	
+	background-color: #2cabec;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#2cabec), to(#c0deed)); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, #2cabec, #c0deed); /* Chrome 10+, Saf5.1+, iOS 5+ */
+	background-image: -moz-linear-gradient(top, #2cabec, #c0deed); /* FF3.6 */
+	background-image: -ms-linear-gradient(top, #2cabec, #c0deed); /* IE10 */
+	background-image: -o-linear-gradient(top, #2cabec, #c0deed); /* Opera 11.10+ */
+	background-image: linear-gradient(top, #2cabec, #c0deed);
+}
+.resultTable td{
+	color:white;
+	text-align:center;
+	font-size:12px;
+}
+.resultTable td:nth-child(2), .resultTable td:nth-child(3), .resultTable td:nth-child(5) {
+	display:none;
 }
 
 /*Photoswipe CSS:*/

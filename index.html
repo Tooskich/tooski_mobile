@@ -15,11 +15,11 @@
 	<body>
 		<div data-role="page" id="page">
 						
-			<div data-role="panel" id="panel" data-position="left" data-theme="a" style="position:fixed;top:0px;">
+			<div data-role="panel" id="panel" data-position="left" data-theme="a" style="position:fixed;top:50px;padding-top:25px;">
 				Si vous pouvez lire, ça, c'est qu'il y a eu une erreur quelque part...
 			</div>
 
-				<div data-role="header" data-id="topBar" data-theme="a">
+				<div data-role="header" id="header" data-id="topBar" data-theme="a">
 					<a href="#panel" data-rel="panel" data-corners="false"><img src="images/menu.png" height="16px"></a>
 					<h1>Tooski Teams</h1>
 				
@@ -71,9 +71,11 @@
 					Avant toute chose, nous voudrions savoir qui vous êtes. Pour cela, il vous suffit de vous connecter ci-dessous:
 				</p>
 				<div id="loginMessage"></div>
-    			<input type="text" name="pseudo" id="pseudo" value="" placeholder="Pseudo"  />
-    			<input type="password" name="password" id="password" value="" placeholder="Mot de Passe" />
-    			<input type="submit" data-role="button" value="Se Connecter" data-icon="check" onClick="tooskiTeams.login();" />
+				<form onsubmit="tooskiTeams.login();">
+    				<input type="text" name="pseudo" id="pseudo" value="" placeholder="Pseudo"  />
+    				<input type="password" name="password" id="password" value="" placeholder="Mot de Passe" />
+    				<input type="submit" data-role="button" value="Se Connecter" data-icon="check" onClick="tooskiTeams.login();" />
+    			</form>
 			</div>
 		</div>
 		</div>
@@ -82,7 +84,8 @@
 		<script type="text/javascript" src="js/photoswipe.js"></script>
 		<script type="text/javascript" >
 			$(document).on( "mobileinit", function(){
-			$.mobile.buttonMarkup.hoverDelay = 0;
+				$Aes.mobile.phonegapNavigationEnabled = true;
+				$.mobile.buttonMarkup.hoverDelay = 0;
         		$.support.cors = true;
         		$.mobile.allowCrossDomainPages = true;       
     		});
@@ -92,6 +95,12 @@
 				$('img, iframe, video').css({
 					"max-width":$('#content').width()+'px'
 				});
+				document.addEventListener('deviceready', function() {
+					document.addEventListener("menubutton", function(){
+						alert('asdds');
+						$('#panel').panel('toggle');
+					}, false);
+				}, false);
 			}
 		</script>
 	</body>
