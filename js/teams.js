@@ -264,7 +264,7 @@ var tooskiTeams = {
 		var private = $('#private').val();
 		var description= $('#description').val();
 		var imageURI = $('#pictureSelection').attr('picture');
-		if (typeof imageURI = 'undefined' OR imageURI = '') {
+		if ((typeof imageURI = 'undefined') || imageURI = '') {
 			navigator.notification.alert('Sélectionnez une image s.v.p.');
 			return false;
 		}
