@@ -1,11 +1,10 @@
 //Announcement of the Namespace
 var tooskiTeams = {
 	//TODO: Change this line:
-	ServerUrl: 'http://192.168.0.106/tooski/api/',
+	ServerUrl: 'http://tooski.ch/api/',
 	//TODO: change this line:
 	base_url: '',
 	storage: localStorage,
-	db: openDatabase('tooskiteamDB', '1.0', 'The Tooski Team App Database', 65536),
 	nbNewsToShow: 25,
 	nbEventsToShow: 25,
 	
@@ -15,9 +14,6 @@ var tooskiTeams = {
 			data: object,
 			dataType: 'jsonp',
 			type: 'POST',
-			/*complete: function(data){
-				alert('complete'+data);
-				cbFunction(data)}*/
 		}).done(cbFunction);
 	},
 	
@@ -79,11 +75,15 @@ var tooskiTeams = {
 			var db = $.parseJSON(tooskiTeams.storage.db);
 			db.team[teamId].news = json;
 			tooskiTeams.storage.db = JSON.stringify(db);
-			tooskiTeams.showListNewsFromDb(teamId);
+			if ($('#tabs a.ui-btn-active ')[0].id == 'menu-news') {
+				tooskiTeams.showListNewsFromDb(teamId);
+			}
 		}); 
 	},
 	
 	showNews: function(newsId, teamId) {
+		$('#menu-news').removeClass('ui-btn-active');
+		$('#content').scrollTop();
 		var team = $.parseJSON(tooskiTeams.storage.db).team[teamId];
 		var news = $.parseJSON(team.news).news;
 		news = $.grep(news, function(n, i) {return parseInt(tooskiTeams.urldecode(n.id)) == parseInt(newsId);});
@@ -162,7 +162,7 @@ var tooskiTeams = {
 	},
 	
 	hasEventsInDB: function(teamId) {
-		if (typeof $.parseJSON(tooskiTeams.storage.db).team[teamId].event != 'undefined') {
+		if (typeof $.parseJSON(tooskiTeams.storage.db).team[teamId].events != 'undefined') {
 			return true;
 		}
 		return false;
@@ -177,18 +177,21 @@ var tooskiTeams = {
 			var db = $.parseJSON(tooskiTeams.storage.db);
 			db.team[teamId].events = json;
 			tooskiTeams.storage.db = JSON.stringify(db);
-			tooskiTeams.showListEventsFromDb(teamId);
+			if ($('#tabs a.ui-btn-active ')[0].id == 'menu-calendar') {
+				tooskiTeams.showListEventsFromDb(teamId);
+			}
 		});
 	}, 
 	
-	createTeamEventView: function(title, description, date, place, file) {
+	createTeamEventView: function(title, description, date, place, file, email) {
 		date = new Date(date * 1000);
 		date = 'Le ' + date.getDate() + '.' + date.getMonth() + '.' + date.getFullYear();
-		return '<div class="eventContainer"><div class="eventHeader"><h2 align="left" class="eventHeaderTitle">'+title+'</h2><p align="right" class="eventHeaderDate">'+date+'</p></div><div class="eventContent"><p align="justify">'+description+'</p></div><div class="eventFooter"><table width="100%"><tr><td><h3>Quand</h3><p>'+date+'</p></td><td><h3>Où</h3><p>'+place+'</p></td><td><h3>Infos</h3><p><a data-role="button" data-icon="info" data-inline="true" data-mini="true" href="'+file+'">Télécharger</a></p></td></tr></table></div></div>';
+		return '<div class="eventContainer"><div class="eventHeader"><h2 align="left" class="eventHeaderTitle">'+title+'</h2><p align="right" class="eventHeaderDate">'+date+'</p></div><div class="eventContent"><p align="justify">'+description+'</p></div><div class="eventFooter"><table width="100%"><tr><td><h3>Quand</h3><p>'+date+'</p></td><td><h3>Où</h3><p>'+place+'</p></td></tr><tr><td><h3>Contact</h3><p><a data-role="button" data-inline="true" data-mini="true" href="mailto:'+email+'"><img src="images/email.png" height="25px" /></a></td><td><h3>Infos</h3><p><a data-role="button" data-inline="true" data-mini="true" href="'+file+'"><img src="images/download.png" height="25px" /></a></p></td></tr></table></div></div>';
 	},
 	
 	showListEventsFromDb: function(teamId) {
 		var obj = $.parseJSON(tooskiTeams.storage.db);
+		var email = obj.team[teamId].email;
 		var obj = $.parseJSON(obj.team[teamId].events);
 		var html = '<center>';
 		for (var i=0; i < obj.event.length && i < tooskiTeams.nbEventsToShow; i++) {
@@ -197,7 +200,7 @@ var tooskiTeams = {
 			var date = tooskiTeams.urldecode(obj.event[i].date);
 			var place = tooskiTeams.urldecode(obj.event[i].place);
 			var file = tooskiTeams.urldecode(obj.event[i].file);
-			html += tooskiTeams.createTeamEventView(title, description, date, place, file);
+			html += tooskiTeams.createTeamEventView(title, description, date, place, file, email);
 		}
 		html += '</center>';
 		tooskiTeams.message('hide', 'Chargement des Calendrier...');
@@ -214,7 +217,7 @@ var tooskiTeams = {
 	},
 	
 	hasPhotosInDB: function(teamId) {
-		if (typeof $.parseJSON(tooskiTeams.storage.db).team[teamId].photo != 'undefined') {
+		if (typeof $.parseJSON(tooskiTeams.storage.db).team[teamId].photos != 'undefined') {
 			return true;
 		}
 		return false;
@@ -240,8 +243,49 @@ var tooskiTeams = {
 		$('#content').trigger('create');
 	},
 	
+	selectPicture: function() {
+		navigator.camera.getPicture( tooskiTeams.setAttributePicture, tooskiTeams.cameraError, {destinationType: navigator.camera.DestinationType.FILE_URI} );
+	},
+	
 	openNewUploadImageScreen: function(teamId) {
-		alert('Upload Screen'+teamId);
+		$('#photoUpload').html('<a onClick="tooskiTeams.selectPicture();" id="pictureSelection" data-role="button">Choisir une Photo</a><br /><input type="text" id="description" placeholder="Description de la photo" /><br /><div data-role="fieldcontain">Photo réservée à la Team ?&nbsp;&nbsp;&nbsp;<select name="private" id="private" data-role="slider"><option value="0">Non</option><option value="1">Oui</option></select></div><br /><input type="button" data-role="button" value="Envoyer l\'image" onClick="tooskiTeams.sendImageToServer('+teamId+')" />');
+		$('#content').trigger('create');
+	},
+	
+	cameraError: function() {
+		navigator.notification.alert('Pas de photo uploadée.', function(){}, 'Information');
+	},
+	
+	setAttributePicture: function(data) {
+		$('#pictureSelection').attr('picture',data);
+	},
+	
+	sendImageToServer: function(teamId) {
+		var private = $('#private').val();
+		var description= $('#description').val();
+		var imageURI = $('#pictureSelection').attr('picture');
+		if (typeof imageURI = 'undefined' OR imageURI = '') {
+			navigator.notification.alert('Sélectionnez une image s.v.p.');
+			return false;
+		}
+		var options = new FileUploadOptions();
+        	options.fileKey="file";
+        	options.fileName=imageURI.substr(imageURI.lastIndexOf('/')+1);
+        	options.mimeType="image/jpeg";
+
+        	var params = {
+			id: tooskiTeams.storage.keyId,
+			team: tooskiTeams.encrypt(teamId,tooskiTeams.storage.secret),
+			private: tooskiTeams.encrypt(private,tooskiTeams.storage.secret),
+			description: tooskiTeams.encrypt(description,tooskiTeams.storage.secret),
+		};
+        	options.params = params;
+        	var ft = new FileTransfer();
+        	ft.upload(imageURI, tooskiTeams.ServerUrl+"sendImage.php", function(r) {
+        	    navigator.notification.alert(r.response);
+        	}, function(error) {
+        	    alert("An error has occurred: Code = " = error.code);
+        	}, options);
 	},
 	
 	preparePhotoPage: function(teamId) {
@@ -258,7 +302,9 @@ var tooskiTeams = {
 			var db = $.parseJSON(tooskiTeams.storage.db);
 			db.team[teamId].photos = json;
 			tooskiTeams.storage.db = JSON.stringify(db);
-			tooskiTeams.generatePhotoGallery(teamId);
+			if ($('#tabs a.ui-btn-active ')[0].id == 'menu-photos') {
+				tooskiTeams.generatePhotoGallery(teamId);
+			}
 		});
 	},
 	
@@ -388,12 +434,6 @@ var tooskiTeams = {
 	 * and then execute a specific function.
 	 */
 	change: function(page, functionToCall) {
-		/*$('#content').load('#'+page, function() {
-			$('#content').trigger('create');
-			if (functionToCall) {
-					functionToCall();
-			}
-		});*/
 		$('#content').html($('#'+page).html());
 		if (functionToCall) {
 			functionToCall();

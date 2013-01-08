@@ -4,6 +4,11 @@ h2, h3, h4, h5, h6 {
 p {
 	text-align:justify;
 }
+.eventFooter table, .eventFooter td, .eventFooter td, .eventFooter td p, .eventFooter td h3 {
+	text-align:center;
+	margin:3px;
+	padding:2px;
+}
 .selectedTeam {
 	background-color:#2cabec;
 }
