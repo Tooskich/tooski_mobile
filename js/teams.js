@@ -189,7 +189,7 @@ var tooskiTeams = {
 	createTeamEventView: function(title, description, date, place, file, email) {
 		date = new Date(date * 1000);
 		date = 'Le ' + date.getDate() + '.' + date.getMonth() + '.' + date.getFullYear();
-		return '<div class="eventContainer"><div class="eventHeader"><h2 align="left" class="eventHeaderTitle">'+title+'</h2><p align="right" class="eventHeaderDate">'+date+'</p></div><div class="eventContent"><p align="justify">'+description+'</p></div><div class="eventFooter"><table width="100%"><tr><td><h3>Quand</h3><p>'+date+'</p></td><td><h3>Où</h3><p>'+place+'</p></td></tr><tr><td><h3>Contact</h3><p><a data-role="button" data-inline="true" data-mini="true" href="mailto:'+email+'"><img src="images/email.png" height="25px" /></a></td><td><h3>Infos</h3><p><a data-role="button" data-inline="true" data-mini="true" href="'+file+'"><img src="images/download.png" height="25px" /></a></p></td></tr></table></div></div>';
+		return '<div class="eventContainer"><div class="eventHeader"><h2 align="left" class="eventHeaderTitle">'+title+'</h2><p align="right" class="eventHeaderDate">'+date+'</p></div><div class="eventContent"><p align="justify">'+description+'</p></div><div class="eventFooter"><table width="100%"><tr><td><h3>Quand</h3><p>'+date+'</p></td><td><h3>Où</h3><p>'+place+'</p></td></tr><tr><td><h3>Contact</h3><p><a data-role="button" data-inline="true" data-mini="true" href="mailto:'+email+'"><img src="images/email.png" height="25px" /></a></td><td><h3>Infos</h3><p><a data-role="button" data-inline="true" data-mini="true" href="'+file+'"><img src="images/notepad.png" height="25px" /></a></p></td></tr></table></div></div>';
 	},
 	
 	showListEventsFromDb: function(teamId) {
@@ -332,13 +332,16 @@ var tooskiTeams = {
 		$('[id*="panel-team-"]').removeClass('selectedTeam');
 		$('#panel-team-'+teamId).addClass('selectedTeam');
 		$('#panel').panel('close', {display: 'reveal'});
-		$(document).scrollTop();
+		$('#content').scrollTop(0);
 		var name = $.parseJSON(tooskiTeams.storage.db).team[teamId].name;
 		$('#header h1').text(name);
 		$('#tabs').removeClass('invisible');
 		$('#menu-news').attr('onclick', 'tooskiTeams.loadTeamNews('+teamId+')');
+		$('#menu-news').bind('tap', function(){tooskiTeams.loadTeamNews(teamId)});
 		$('#menu-photos').attr('onclick', 'tooskiTeams.loadTeamPhoto('+teamId+')');
+		$('#menu-photos').bind('tap', function(){tooskiTeams.loadTeamPhoto(teamId)});
 		$('#menu-calendar').attr('onclick', 'tooskiTeams.loadTeamCalendar('+teamId+')');
+		$('#menu-calendar').bind('tap', function(){tooskiTeams.loadTeamCalendar(teamId)});
 		$('#menu-news').trigger('click');
 	},
 	
@@ -358,7 +361,7 @@ var tooskiTeams = {
 				}
 			}
 		}
-		html += '<br /><br /><br /><h3 style="margin-bottom:0px;margin-top:10px;margin-left:15px;" align="center">Options</h3><hr style="maring-left:5px;" align="center" height="10px" width="90%" /><hr color="black" size="2px" width="100%" style="margin-bottom:0px;"><div id="panel-team-logout" onClick="tooskiTeams.logout();" style="padding-left:5px;border-bottom:solid black 2px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:16px;padding-bottom:12px;margin-top:0px;margin-bottom:0px;"><img src="images/power@2x.png" style="max-height:30px;max-width:50px;margin-right:10px;vertical-align:middle;" />Se déconnecter</h4></div>';
+		html += '<br /><br /><br /><div style="position:fixed;bottom:150px;width:100%;"><h3 style="margin-bottom:0px;margin-top:10px;margin-left:15px;" align="center">Options</h3><hr style="maring-left:5px;" align="center" height="10px" width="90%" /><hr color="black" size="2px" width="100%" style="margin-bottom:0px;"><div id="panel-team-logout" onClick="tooskiTeams.logout();" style="padding-left:5px;border-bottom:solid black 2px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:16px;padding-bottom:12px;margin-top:0px;margin-bottom:0px;"><img src="images/power@2x.png" style="max-height:30px;max-width:50px;margin-right:10px;vertical-align:middle;" />Se déconnecter</h4></div></div>';
 		$('#panel').append(html);
 	},
 	
@@ -441,6 +444,7 @@ var tooskiTeams = {
 				tooskiTeams.generateTeamMenu();
 			}
 			tooskiTeams.getWelcomePage();
+			$('#login, #welcome').html('');
 		}
 		else {
 			tooskiTeams.loadLoginPage();

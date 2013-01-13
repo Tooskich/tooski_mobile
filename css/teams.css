@@ -6,11 +6,15 @@ p {
 }
 #header {
      position: fixed;
-     top: 0;
-     left: 0;
+     top: 0px;
+     left: 0px;
      width: 100%;
-     z-index:500;
+     z-index:1000;
 }
+#panel {
+	background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAIUlEQVQIW2N88eLFfwY0wIhXUFxcnOHly5dgPfhVIhsLAPkFFZlLXnhSAAAAAElFTkSuQmCC) repeat;
+}
+
 #content {
 	padding-top:50px;
 	position:relative;
