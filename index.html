@@ -84,7 +84,7 @@
 		<script type="text/javascript" src="js/photoswipe.js"></script>
 		<script type="text/javascript" >
 			$(document).on( "mobileinit", function(){
-				$Aes.mobile.phonegapNavigationEnabled = true;
+				$.mobile.phonegapNavigationEnabled = true;
 				$.mobile.buttonMarkup.hoverDelay = 0;
         		$.support.cors = true;
         		$.mobile.allowCrossDomainPages = true;       
@@ -96,8 +96,8 @@
 					"max-width":$('#content').width()+'px'
 				});
 				document.addEventListener('deviceready', function() {
+					navigator.splashscreen.hide();
 					document.addEventListener("menubutton", function(){
-						alert('asdds');
 						$('#panel').panel('toggle');
 					}, false);
 				}, false);

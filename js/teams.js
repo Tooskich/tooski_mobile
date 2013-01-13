@@ -247,7 +247,13 @@ var tooskiTeams = {
 	},
 	
 	selectPicture: function(src) {
-		navigator.camera.getPicture( tooskiTeams.setAttributePicture, tooskiTeams.cameraError, {destinationType: navigator.camera.DestinationType.FILE_URI, sourceType: src} );
+		alert(src);
+		if (src == 'camera') {
+			navigator.camera.getPicture( tooskiTeams.setAttributePicture, tooskiTeams.cameraError, {destinationType: navigator.camera.DestinationType.FILE_URI, sourceType: navigator.camera.PictureSourceType.CAMERA} );
+		}
+		else {
+			navigator.camera.getPicture( tooskiTeams.setAttributePicture, tooskiTeams.cameraError, {destinationType: navigator.camera.DestinationType.FILE_URI, sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY} );
+		}
 	},
 	
 	openNewUploadImageScreen: function(teamId, src) {
@@ -294,7 +300,7 @@ var tooskiTeams = {
 	},
 	
 	preparePhotoPage: function(teamId) {
-		$('#content').html('<div id="photoUpload"><center><fieldset class="ui-grid-a resp-grid"><div class="ui-block-a"><button href="#" data-role="button" data-icon="plus" onClick="tooskiTeams.openNewUploadImageScreen('+teamId+', \'navigator.camera.PictureSourceType.PHOTOLIBRARY\');" >Choisir une Photo&nbsp;&nbsp;<img src="images/photos.png" height="15px" /></button></div><div class="ui-block-b"><button href="#" data-role="button" data-icon="plus" onClick="tooskiTeams.openNewUploadImageScreen('+teamId+', \'navigator.camera.PictureSourceType.CAMER\');" >Prendre une Photo&nbsp;&nbsp;<img src="images/photoup.png" height="15px" /></button></div></fieldset></center></div><br /><hr size="2px" width="100%" /><h3>Galerie Photo</h3><div id="photoLibrary"></div>');
+		$('#content').html('<div id="photoUpload"><center><fieldset class="ui-grid-a resp-grid"><div class="ui-block-a"><button href="#" data-role="button" data-icon="plus" onClick="tooskiTeams.openNewUploadImageScreen('+teamId+', \'library\');" >Choisir une Photo&nbsp;&nbsp;<img src="images/photos.png" height="15px" /></button></div><div class="ui-block-b"><button href="#" data-role="button" data-icon="plus" onClick="tooskiTeams.openNewUploadImageScreen('+teamId+', \'camera\');" >Prendre une Photo&nbsp;&nbsp;<img src="images/photoup.png" height="15px" /></button></div></fieldset></center></div><br /><hr size="2px" width="100%" /><h3>Galerie Photo</h3><div id="photoLibrary"></div>');
 		$('#content').trigger('create');
 	},
 	
