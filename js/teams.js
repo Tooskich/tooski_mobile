@@ -264,6 +264,7 @@ var tooskiTeams = {
 	},
 	
 	sendImageToServer: function(teamId) {
+		navigator.notification.alert('Upload de la photo vers le serveur en cours.', function(){}, 'Upload');
 		var private = $('#private').val();
 		var description= $('#description').val();
 		var imageURI = $('#pictureSelection').attr('picture');
@@ -425,7 +426,6 @@ var tooskiTeams = {
 	 * The first function to be called when the app is started.
 	 */
 	init: function() {
-		alert('init');
 		tooskiTeams.message('show', 'Chargement en cours...');
 		if (tooskiTeams.loggedIn()) {
 			if (!tooskiTeams.hasTeamSettings()) {
