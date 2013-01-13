@@ -360,7 +360,7 @@ var tooskiTeams = {
 				}
 			}
 		}
-		html += '<br /><br /><br /><div style="position:fixed;bottom:100px;width:100%;"><h3 style="margin-bottom:0px;margin-top:10px;margin-left:15px;" align="center">Options</h3><hr style="maring-left:5px;" align="center" height="10px" width="90%" /><hr color="black" size="2px" width="100%" style="margin-bottom:0px;"><div id="panel-team-logout" onClick="tooskiTeams.logout();" style="padding-left:5px;border-bottom:solid black 2px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:16px;padding-bottom:12px;margin-top:0px;margin-bottom:0px;"><img src="images/power@2x.png" style="max-height:30px;max-width:50px;margin-right:10px;vertical-align:middle;" />Se déconnecter</h4></div></div>';
+		html += '<br /><br /><br /><div style="position:fixed;bottom:15%;width:100%;"><h3 style="margin-bottom:0px;margin-top:10px;margin-left:15px;" align="center">Options</h3><hr style="maring-left:5px;" align="center" height="10px" width="90%" /><hr color="black" size="2px" width="100%" style="margin-bottom:0px;"><div id="panel-team-logout" onClick="tooskiTeams.logout();" style="padding-left:5px;border-bottom:solid black 2px;padding-top:0px;padding-bottom:0px;margin-top:0px;margin-bottom:0px;"><h4 style="padding-top:16px;padding-bottom:12px;margin-top:0px;margin-bottom:0px;"><img src="images/power@2x.png" style="max-height:30px;max-width:50px;margin-right:10px;vertical-align:middle;" />Se déconnecter</h4></div></div>';
 		$('#panel').append(html);
 	},
 	

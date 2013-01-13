@@ -30,6 +30,9 @@ p {
 		float:none; 
 	}
 }
+.ui-navbar ul {
+  overflow: visible !important;
+}
 .eventFooter table, .eventFooter td, .eventFooter td, .eventFooter td p, .eventFooter td h3 {
 	text-align:center;
 	margin:3px;
