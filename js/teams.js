@@ -2,8 +2,6 @@
 var tooskiTeams = {
 	//TODO: Change this line:
 	ServerUrl: 'http://tooski.ch/api/',
-	//TODO: change this line:
-	base_url: '',
 	storage: localStorage,
 	nbNewsToShow: 1000,
 	nbEventsToShow: 1000,
@@ -40,15 +38,16 @@ var tooskiTeams = {
 		}, function(data) {
 			var response = $.parseJSON(data);
 			if (response.state == 1) {
-				$('#loginMessage').html('<center><p><i><font color="green">'+response.message+'</font></i></p></center>');
 				tooskiTeams.storage.keyId = response.id;
+				$('#loginMessage').html('<center><p><i><font color="green">'+response.message+'</font></i></p></center>');
 				/*$(document).bind('pagechange', function() {
 					tooskiTeams.init();
-				});
-				$.mobile.changePage('#page');//, {reloadPage:true, allowSamePageTransition:true});
-				tooskiTeams.init();*/
-				$.mobile.changePage('index.html');
-				window.location.reload();
+				});*/
+				//$.mobile.changePage('#page');//, {reloadPage:true, allowSamePageTransition:true});
+				//tooskiTeams.init();
+				setTimeout(function() {
+					window.location.reload();
+				}, 750);
 			}
 			else if (response.state == 0) {
 				$('#loginMessage').html('<center><p><i><font color="red">'+response.message+'</font></i></p></center>');
