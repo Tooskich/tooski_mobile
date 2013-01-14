@@ -41,8 +41,9 @@ var tooskiTeams = {
 				tooskiTeams.storage.keyId = response.id;
 				$('#loginMessage').html('<center><p><i><font color="green">'+response.message+'</font></i></p></center>');
 				setTimeout(function() {
-					window.location.reload();
-				}, 750);
+					window.location = 'index.html';
+					//window.location.reload();
+				}, 1000);
 			}
 			else if (response.state == 0) {
 				$('#loginMessage').html('<center><p><i><font color="red">'+response.message+'</font></i></p></center>');
@@ -414,7 +415,7 @@ var tooskiTeams = {
 	},
 	
 	getTeamSettings: function() {
-		tooskiTeams.initializeDatabase();
+		//tooskiTeams.initializeDatabase();
 		tooskiTeams.getTeamFromServer();
 	},
 	
