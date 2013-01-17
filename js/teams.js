@@ -1,7 +1,7 @@
 //Announcement of the Namespace
 var tooskiTeams = {
 	//TODO: Change this line:
-	ServerUrl: 'http://tooski.ch/api/',
+	ServerUrl: 'http://192.168.0.107/tooski/api/',
 	storage: localStorage,
 	nbNewsToShow: 1000,
 	nbEventsToShow: 1000,
@@ -131,13 +131,16 @@ var tooskiTeams = {
 	
 	showListNewsFromDb: function(teamId) {
 		var obj = $.parseJSON(tooskiTeams.storage.db);
-		var obj = $.parseJSON(obj.team[teamId].news);
-		var html = '<center>';
-		for (var i=0; i < obj.news.length && i < tooskiTeams.nbNewsToShow; i++) {
-			var title = tooskiTeams.urldecode(obj.news[i].title);
-			var text = tooskiTeams.urldecode(obj.news[i].text);
-			var id = tooskiTeams.urldecode(obj.news[i].id);
-			html += tooskiTeams.createTeamNewsPreview(title, text, id, teamId);
+		var html = '<center><h3>Il n\'y a pas de News pour le moment.</h3>';
+		if (obj.team[teamId].news != '{"news":]}') {
+			var obj = $.parseJSON(obj.team[teamId].news);
+			html = '<center>';
+			for (var i=0; i < obj.news.length && i < tooskiTeams.nbNewsToShow; i++) {
+				var title = tooskiTeams.urldecode(obj.news[i].title);
+				var text = tooskiTeams.urldecode(obj.news[i].text);
+				var id = tooskiTeams.urldecode(obj.news[i].id);
+				html += tooskiTeams.createTeamNewsPreview(title, text, id, teamId);
+			}	
 		}
 		html += '</center>';
 		tooskiTeams.message('hide', '');
@@ -190,15 +193,18 @@ var tooskiTeams = {
 	showListEventsFromDb: function(teamId) {
 		var obj = $.parseJSON(tooskiTeams.storage.db);
 		var email = obj.team[teamId].email;
-		var obj = $.parseJSON(obj.team[teamId].events);
-		var html = '<center>';
-		for (var i=0; i < obj.event.length && i < tooskiTeams.nbEventsToShow; i++) {
-			var title = tooskiTeams.urldecode(obj.event[i].title);
-			var description = tooskiTeams.urldecode(obj.event[i].description);
-			var date = tooskiTeams.urldecode(obj.event[i].date);
-			var place = tooskiTeams.urldecode(obj.event[i].place);
-			var file = tooskiTeams.urldecode(obj.event[i].file);
-			html += tooskiTeams.createTeamEventView(title, description, date, place, file, email);
+		var html = '<center><h3>Il n\'y a pas d\'évènement pour le moment</h3>';
+		if (obj.team[teamId].events != '{"event":]}') {
+			var obj = $.parseJSON(obj.team[teamId].events);
+			html = '<center>';
+			for (var i=0; i < obj.event.length && i < tooskiTeams.nbEventsToShow; i++) {
+				var title = tooskiTeams.urldecode(obj.event[i].title);
+				var description = tooskiTeams.urldecode(obj.event[i].description);
+				var date = tooskiTeams.urldecode(obj.event[i].date);
+				var place = tooskiTeams.urldecode(obj.event[i].place);
+				var file = tooskiTeams.urldecode(obj.event[i].file);
+				html += tooskiTeams.createTeamEventView(title, description, date, place, file, email);
+			}		
 		}
 		html += '</center>';
 		tooskiTeams.message('hide', 'Chargement des Calendrier...');
@@ -223,15 +229,19 @@ var tooskiTeams = {
 	
 	generatePhotoGallery: function(teamId, albumId)  {
 		var obj = $.parseJSON(tooskiTeams.storage.db);
-		var obj = $.parseJSON(obj.team[teamId].photos[albumId]);
-		var html = '<center>';
-		for (var i=0; i < obj.photo.length; i++) {
-			var filename = tooskiTeams.urldecode(obj.photo[i].filename);
-			var description = tooskiTeams.urldecode(obj.photo[i].description);
-			html += '<a class="imgContainer" href="http://res.cloudinary.com/tooski/image/upload/'+filename+'"><img src="http://res.cloudinary.com/tooski/image/upload/c_fill,w_300/'+filename+'" width="150px" alt="'+description+'" /></a>';
+		var html = '<center><h3>Il n\'y a pas de photos pour l\'instant.</h3>';
+		if (obj.team[teamId].photos[albumId] != '{"photo":]}') {
+			var obj = $.parseJSON(obj.team[teamId].photos[albumId]);
+			html = '<center>';
+			for (var i=0; i < obj.photo.length; i++) {
+				var filename = tooskiTeams.urldecode(obj.photo[i].filename);
+				var description = tooskiTeams.urldecode(obj.photo[i].description);
+				html += '<a class="imgContainer" href="http://res.cloudinary.com/tooski/image/upload/'+filename+'"><img src="http://res.cloudinary.com/tooski/image/upload/c_fill,w_300/'+filename+'" width="150px" alt="'+description+'" /></a>';
+			}
 		}
 		tooskiTeams.message('hide', 'Chargement des Photos...');
-		html += '</center>';$('#photoLibrary').html(html);
+		html += '</center>';
+		$('#photoLibrary').html(html);
 		$("#photoLibrary a").photoSwipe({
 			enableMouseWheel: false , 
 			enableKeyboard: false ,
@@ -328,13 +338,16 @@ var tooskiTeams = {
 	
 	generateAlbumsGallery: function(teamId) {
 		var obj = $.parseJSON(tooskiTeams.storage.db);
-		var obj = $.parseJSON(obj.team[teamId].albums);
-		var html = '<div align="left" style=""><h3>Albums Photo</h3>';
-		for (var i=0; i < obj.album.length; i++) {
-			var title = tooskiTeams.urldecode(obj.album[i].title);
-			var cover = tooskiTeams.urldecode(obj.album[i].cover);
-			var id = tooskiTeams.urldecode(obj.album[i].id);
-			html += '<div onclick="tooskiTeams.loadTeamPhoto('+teamId+', '+id+')" style="display:inline-block;padding:5px;margin:5px;border:solid black 1px;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;" align="center"><img src="http://res.cloudinary.com/tooski/image/upload/c_fill,w_300/'+cover+'" style="max-width:150px;max-height:150px;" /><h4>'+title+'</h4></div>';
+		var html = '<div><h3>Il n\'y a pas d\'album pour l\'instant.</h3>'
+		if (obj.team[teamId].albums != '{"album":]}') {
+			var obj = $.parseJSON(obj.team[teamId].albums);
+			html = '<div align="left" style=""><h3>Albums Photo</h3>';
+			for (var i=0; i < obj.album.length; i++) {
+				var title = tooskiTeams.urldecode(obj.album[i].title);
+				var cover = tooskiTeams.urldecode(obj.album[i].cover);
+				var id = tooskiTeams.urldecode(obj.album[i].id);
+				html += '<div onclick="tooskiTeams.loadTeamPhoto('+teamId+', '+id+')" style="display:inline-block;padding:5px;margin:5px;border:solid black 1px;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;" align="center"><img src="http://res.cloudinary.com/tooski/image/upload/c_fill,w_300/'+cover+'" style="max-width:150px;max-height:150px;" /><h4>'+title+'</h4></div>';
+			}
 		}
 		tooskiTeams.message('hide', 'Chargement des Photos...');
 		html += '</div>';
@@ -382,11 +395,8 @@ var tooskiTeams = {
 		$('#header h1').text(name);
 		$('#tabs').removeClass('invisible');
 		$('#menu-news').attr('onclick', 'tooskiTeams.loadTeamNews('+teamId+')');
-		$('#menu-news').bind('tap', function(){tooskiTeams.loadTeamNews(teamId)});
 		$('#menu-photos').attr('onclick', 'tooskiTeams.loadTeamAlbum('+teamId+')');
-		$('#menu-photos').bind('tap', function(){tooskiTeams.loadTeamAlbum(teamId)});
 		$('#menu-calendar').attr('onclick', 'tooskiTeams.loadTeamCalendar('+teamId+')');
-		$('#menu-calendar').bind('tap', function(){tooskiTeams.loadTeamCalendar(teamId)});
 		$('#menu-news').trigger('click');
 	},
 	
