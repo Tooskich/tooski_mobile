@@ -1,7 +1,7 @@
 //Announcement of the Namespace
 var tooskiTeams = {
 	//TODO: Change this line:
-	ServerUrl: 'http://192.168.0.107/tooski/api/',
+	ServerUrl: 'http://tooski.ch/api/',
 	storage: localStorage,
 	nbNewsToShow: 1000,
 	nbEventsToShow: 1000,
