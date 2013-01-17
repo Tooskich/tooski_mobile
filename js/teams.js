@@ -43,7 +43,7 @@ var tooskiTeams = {
 				setTimeout(function() {
 					window.location = 'index.html';
 					//window.location.reload();
-				}, 1000);
+				}, 1500);
 			}
 			else if (response.state == 0) {
 				$('#loginMessage').html('<center><p><i><font color="red">'+response.message+'</font></i></p></center>');
@@ -51,7 +51,6 @@ var tooskiTeams = {
 			else {
 				$('#loginMessage').html('<center><p><i><font color="red">Problèmes de connexion avec le serveur.</font></i></p></center>');
 			}
-			tooskiTeams.loadLoginPage();
 		});
 	},
 	
@@ -335,7 +334,7 @@ var tooskiTeams = {
 			var title = tooskiTeams.urldecode(obj.album[i].title);
 			var cover = tooskiTeams.urldecode(obj.album[i].cover);
 			var id = tooskiTeams.urldecode(obj.album[i].id);
-			html += '<div onclick="tooskiTeams.loadTeamPhoto('+teamId+', '+id+')" style="display:inline-block;width:150px;max-height:150px;padding:5px;margin:5px;border:solid black 1px;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;" align="center"><img src="http://res.cloudinary.com/tooski/image/upload/c_fill,w_300/'+cover+'" style="max-width:150px;max-height:150px;" /><h4>'+title+'</h4></div>';
+			html += '<div onclick="tooskiTeams.loadTeamPhoto('+teamId+', '+id+')" style="display:inline-block;padding:5px;margin:5px;border:solid black 1px;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;" align="center"><img src="http://res.cloudinary.com/tooski/image/upload/c_fill,w_300/'+cover+'" style="max-width:150px;max-height:150px;" /><h4>'+title+'</h4></div>';
 		}
 		tooskiTeams.message('hide', 'Chargement des Photos...');
 		html += '</div>';

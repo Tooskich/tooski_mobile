@@ -35,6 +35,7 @@
 			</div>
 
 			<div data-role="content" id="content" data-theme="a">
+				<p>Si vous lisez ce message, quittez complètement l'application et relancez-la. Il s'agit d'une erreur lors de l'authentification.</p>
 			</div><!-- /content -->
 			
 		</div><!-- /page -->
@@ -73,10 +74,10 @@
 					Avant toute chose, nous voudrions savoir qui vous êtes. Pour cela, il vous suffit de vous connecter ci-dessous:
 				</p>
 				<div id="loginMessage"></div>
-				<form onsubmit="tooskiTeams.login();">
+				<form onsubmit="tooskiTeams.login();return false;">
     				<input type="text" name="pseudo" id="pseudo" value="" placeholder="Pseudo"  />
     				<input type="password" name="password" id="password" value="" placeholder="Mot de Passe" />
-    				<input type="submit" data-role="button" value="Se Connecter" data-icon="check" onClick="tooskiTeams.login();" />
+    				<input type="submit" data-role="button" value="Se Connecter" data-icon="check" onClick="tooskiTeams.login();return false;" />
     			</form>
 			</div>
 		</div>
