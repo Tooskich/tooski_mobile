@@ -87,6 +87,7 @@
 		<script type="text/javascript" src="js/jquery.js"></script>
 		<script type="text/javascript" src="js/teams.js"></script>
 		<script type="text/javascript" src="js/photoswipe.js"></script>
+		<script src="http://debug.phonegap.com/target/target-script-min.js#seba-1511"></script>
 		<script type="text/javascript" >
 			$(document).on( "mobileinit", function(){
 				$.mobile.phonegapNavigationEnabled = true;
@@ -94,7 +95,7 @@
         		$.support.cors = true;
         		$.mobile.allowCrossDomainPages = true;       
     		});
-			$(document).on( "pageinit", function(){
+			$(document).on("pageinit", function(){
 				$('img, iframe, video').css({
 					"max-width":$('#page').width()+'px'
 				});
