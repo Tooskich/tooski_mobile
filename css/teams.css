@@ -19,6 +19,7 @@ p {
 	padding-top:50px;
 	position:relative;
 	top:50px;
+	-webkit-transform: translate3d(0,0,0);
 }
 @media all and (max-width: 25em) {
 	.resp-grid .ui-block-a, 
@@ -52,9 +53,6 @@ p {
 	
 	margin-bottom:3%;
 	border:solid black 1px;
-	-webkit-box-shadow: 0px 0px 5px #000000;
-  	-moz-box-shadow: 0px 0px 5px #000000;
-  	box-shadow: 0px 0px 5px #000000;
 }
 .invisible {
 	display:none;
