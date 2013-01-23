@@ -114,7 +114,7 @@ var tooskiTeams = {
 			div.innerHTML = text;
 			var content = '<p align="justify">'+(div.textContent || div.innerText || "").substring(0, 300)+'...'+'</p>';
 		}
-		return '<div onclick="tooskiTeams.showNews('+id+', '+teamId+');" class="team-news-div-preview"><div><h2 style="margin:0px;padding:5px;">'+title+'</h2></div><div>'+content+'</div></div>';
+		return '<div onclick="tooskiTeams.showNews('+id+', '+teamId+');" class="team-news-div-preview"><h2 style="margin:0px;padding:5px;">'+title+'</h2>'+content+'</div>';
 	},
 	
 	sortByDate: function (a, b) {
@@ -148,7 +148,6 @@ var tooskiTeams = {
 		tooskiTeams.message('hide', '');
 		$('#content').html(html);
 		$(document).trigger('create');
-		var iScroll = new iScroll('content');
 	},
 	
 	hasNewsInDB: function(teamId) {
@@ -191,7 +190,7 @@ var tooskiTeams = {
 	createTeamEventView: function(title, description, date, place, file, email) {
 		date = new Date(date * 1000);
 		date = 'Le ' + date.getDate() + '.' + date.getMonth() + '.' + date.getFullYear();
-		return '<div class="eventContainer"><div class="eventHeader"><h2 align="left" class="eventHeaderTitle">'+title+'</h2><p align="right" class="eventHeaderDate">'+date+'</p></div><div class="eventContent"><p align="justify">'+description+'</p></div><div class="eventFooter"><table width="100%"><tr><td><h3>Quand</h3><p>'+date+'</p></td><td><h3>Où</h3><p><a href="http://maps.google.com/maps?hl=en&amp;q='+encodeURI(place)+'" rel="external"><img src ="images/map@2x.png" height="30px" /><br />'+place+'</a></p></td></tr><tr><td><h3>Contact</h3><p><a data-role="button" data-inline="true" data-mini="true" href="mailto:'+email+'"><img src="images/email.png" height="25px" /></a></td><td><h3>Infos</h3><p><a data-role="button" data-inline="true" data-mini="true" href="'+file+'"><img src="images/notepad.png" height="25px" /></a></p></td></tr></table></div></div>';
+		return '<div class="eventContainer"><div class="eventHeader"><h2 align="left" class="eventHeaderTitle">'+title+'</h2><p align="right" class="eventHeaderDate">'+date+'</p></div><div class="eventContent"><p align="justify">'+description+'</p></div><table width="100%" class="eventFooter"><tr><td><h3>Quand</h3>'+date+'</td><td><h3>Où</h3><a href="http://maps.google.com/maps?hl=en&amp;q='+encodeURI(place)+'" rel="external"><img src ="images/map@2x.png" height="30px" /><br />'+place+'</a></td></tr><tr><td><h3>Contact</h3><p><a data-role="button" data-inline="true" data-mini="true" href="mailto:'+email+'"><img src="images/email.png" height="25px" /></a></td><td><h3>Infos</h3><p><a data-role="button" data-inline="true" data-mini="true" href="'+file+'"><img src="images/notepad.png" height="25px" /></a></p></td></tr></table></div>';
 	},
 	
 	showListEventsFromDb: function(teamId) {
@@ -214,7 +213,6 @@ var tooskiTeams = {
 		tooskiTeams.message('hide', 'Chargement des Calendrier...');
 		$('#content').html(html);
 		$('#content').trigger('create');
-		var iScroll = new iScroll('content');
 	},
 	
 	loadTeamCalendar: function(teamId) {
@@ -254,7 +252,6 @@ var tooskiTeams = {
 			loop:false
 		});
 		$('#content').trigger('create');
-		var iScroll = new iScroll('content');
 	},
 	
 	selectPicture: function(src) {
@@ -359,7 +356,6 @@ var tooskiTeams = {
 		html += '</div>';
 		$('#content').html(html);
 		$('#content').trigger('create');
-		var iScroll = new iScroll('content');
 	},
 	
 	getAlbumsListIntoDB: function (teamId) {
@@ -440,6 +436,7 @@ var tooskiTeams = {
 	
 	getWelcomePage: function() {
 		tooskiTeams.change('welcome');
+		$('#welcome').html('');
 	},
 	
 	message: function(state, text) {

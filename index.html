@@ -12,8 +12,7 @@
 		<link rel="stylesheet" href="css/teams.css" />
 		<script type="text/javascript" src="js/cordova.js"></script>
 	</head> 
-	<body onload="initFastButtons();">
-		<span id="fastclick">
+	<body onload="initFastButtons();" id="fastclick">
 		<div data-role="page" id="page">
 						
 			<div data-role="panel" id="panel" data-position="left" data-theme="a" style="position:fixed;top:0px;">
@@ -107,11 +106,16 @@
 						$('#panel').panel('toggle');
 					}, false);
 				}, false);
-				$(document).on('pagecreate',function() {
-					initFastButtons();
-				} );
 			});
+			var iScroll = new iScroll('content');
+			window.onload = function() {
+				$(document).bind('create',function() {
+					/*Performances opertions*/
+					initFastButtons();
+					iScroll.refresh();
+					iScroll.scrollTo(0, 0, 0);
+				} );
+			}
 		</script>
-		</span>
 	</body>
 </html>
