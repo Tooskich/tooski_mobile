@@ -354,6 +354,7 @@ var tooskiTeams = {
 		tooskiTeams.message('hide', 'Chargement des Photos...');
 		html += '</div>';
 		$('#content').html(html);
+		$('#content').trigger('create');
 	},
 	
 	getAlbumsListIntoDB: function (teamId) {

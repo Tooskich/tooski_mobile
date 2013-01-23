@@ -95,11 +95,11 @@
         		$.mobile.allowCrossDomainPages = true;       
     		});
 			$(document).on( "pageinit", function(){
+				$('img, iframe, video').css({
+					"max-width":$('#page').width()+'px'
+				});
 				//Function to launch when app is first started.
 				tooskiTeams.init();
-				$('img, iframe, video').css({
-					"max-width":$('#content').width()+'px'
-				});
 				document.addEventListener('deviceready', function() {
 					navigator.splashscreen.hide();
 					document.addEventListener("menubutton", function(){
