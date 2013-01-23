@@ -12,7 +12,8 @@
 		<link rel="stylesheet" href="css/teams.css" />
 		<script type="text/javascript" src="js/cordova.js"></script>
 	</head> 
-	<body>
+	<body onload="initFastButtons();">
+		<span id="fastclick">
 		<div data-role="page" id="page">
 						
 			<div data-role="panel" id="panel" data-position="left" data-theme="a" style="position:fixed;top:0px;">
@@ -87,7 +88,6 @@
 		<script type="text/javascript" src="js/jquery.js"></script>
 		<script type="text/javascript" src="js/teams.js"></script>
 		<script type="text/javascript" src="js/photoswipe.js"></script>
-		<script src="http://debug.phonegap.com/target/target-script-min.js#seba-1511"></script>
 		<script type="text/javascript" >
 			$(document).on( "mobileinit", function(){
 				$.mobile.phonegapNavigationEnabled = true;
@@ -107,7 +107,11 @@
 						$('#panel').panel('toggle');
 					}, false);
 				}, false);
+				$(document).on('pagecreate',function() {
+					initFastButtons();
+				} );
 			});
 		</script>
+		</span>
 	</body>
 </html>

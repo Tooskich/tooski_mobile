@@ -147,6 +147,8 @@ var tooskiTeams = {
 		html += '</center>';
 		tooskiTeams.message('hide', '');
 		$('#content').html(html);
+		$(document).trigger('create');
+		var iScroll = new iScroll('content');
 	},
 	
 	hasNewsInDB: function(teamId) {
@@ -212,6 +214,7 @@ var tooskiTeams = {
 		tooskiTeams.message('hide', 'Chargement des Calendrier...');
 		$('#content').html(html);
 		$('#content').trigger('create');
+		var iScroll = new iScroll('content');
 	},
 	
 	loadTeamCalendar: function(teamId) {
@@ -251,6 +254,7 @@ var tooskiTeams = {
 			loop:false
 		});
 		$('#content').trigger('create');
+		var iScroll = new iScroll('content');
 	},
 	
 	selectPicture: function(src) {
@@ -355,6 +359,7 @@ var tooskiTeams = {
 		html += '</div>';
 		$('#content').html(html);
 		$('#content').trigger('create');
+		var iScroll = new iScroll('content');
 	},
 	
 	getAlbumsListIntoDB: function (teamId) {
