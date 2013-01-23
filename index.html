@@ -15,11 +15,11 @@
 	<body>
 		<div data-role="page" id="page">
 						
-			<div data-role="panel" id="panel" data-position="left" data-theme="a" style="position:fixed;top:50px;padding-top:25px;">
+			<div data-role="panel" id="panel" data-position="left" data-theme="a" style="position:fixed;top:0px;">
 				Si vous pouvez lire ce message, essayez de relancer l'application. Ou de vous reconnecter.
 			</div>
 
-			<div data-role="header"  data-position="fixed">
+			<div data-role="header" data-position="fixed">
 				<div data-role="header" id="header" data-id="topBar" data-theme="a">
 					<a href="#panel" data-rel="panel" data-corners="false"><img src="images/menu.png" height="16px"></a>
 					<h1>Tooski Teams</h1>
@@ -35,7 +35,8 @@
 			</div>
 
 			<div data-role="content" id="content" data-theme="a">
-				<p>Si vous lisez ce message, quittez complètement l'application et relancez-la. Il s'agit d'une erreur lors de l'authentification.</p>
+				<p>Si vous lisez ce message, cliquez sur "Se connecter" svp. Il s'agit d'une erreur lors du chargement.</p>
+				<a href="#login" id="openLoginButton" data-role="button" data-rel="dialog">Se connecter</a>
 			</div><!-- /content -->
 			
 		</div><!-- /page -->
@@ -63,24 +64,25 @@
 				<h3 class="span8" align="left">... et plus encore !</h3>
 				<p class="span8" align="justify">Tooski Team est toujours en développement ! Alors attendez-vous a être toujours de plus en plus surpris par nos nouvelles fonctionnalités. Et même si nous avons quelques idées derrière la tête(Vidéos, Photos des Membres, Chat, ...), c'est toujours intéressant de connaître les vôtres. N'hésitez donc pas à <a href="mailto:info@tooski.ch">nous contacter</a> pour nous les transmettre !</p>
 		</div>
+		
 		<div id="login" data-role="page">
-			<div role="dialog" id="loginPage">
-			<div data-role="header">
-				<h1>Bienvenue !</h1>
+			<div role="dialog" data-close-btn="none" id="loginPage">
+				<div data-role="header">
+					<h1>Bienvenue !</h1>
+				</div>
+				<div data-role="content">
+					<h3>Bienvenue sur l'app Tooski Team</h3>
+					<p id="loginText" align="justify">
+						Avant toute chose, nous voudrions savoir qui vous êtes. Pour cela, il vous suffit de vous connecter ci-dessous:
+					</p>
+					<div id="loginMessage"></div>
+					<form onsubmit="tooskiTeams.login();return false;">
+    					<input type="text" name="pseudo" id="pseudo" value="" placeholder="Pseudo"  />
+    					<input type="password" name="password" id="password" value="" placeholder="Mot de Passe" />
+    					<input type="submit" data-role="button" value="Se Connecter" data-icon="check" onClick="tooskiTeams.login();return false;" />
+    				</form>
+				</div>
 			</div>
-			<div data-role="content">
-				<h3>Bienvenue sur l'app Tooski Team</h3>
-				<p id="loginText" align="justify">
-					Avant toute chose, nous voudrions savoir qui vous êtes. Pour cela, il vous suffit de vous connecter ci-dessous:
-				</p>
-				<div id="loginMessage"></div>
-				<form onsubmit="tooskiTeams.login();return false;">
-    				<input type="text" name="pseudo" id="pseudo" value="" placeholder="Pseudo"  />
-    				<input type="password" name="password" id="password" value="" placeholder="Mot de Passe" />
-    				<input type="submit" data-role="button" value="Se Connecter" data-icon="check" onClick="tooskiTeams.login();return false;" />
-    			</form>
-			</div>
-		</div>
 		</div>
 		<script type="text/javascript" src="js/jquery.js"></script>
 		<script type="text/javascript" src="js/teams.js"></script>
@@ -92,7 +94,7 @@
         		$.support.cors = true;
         		$.mobile.allowCrossDomainPages = true;       
     		});
-			window.onload = function() {
+			$(document).on( "pageinit", function(){
 				//Function to launch when app is first started.
 				tooskiTeams.init();
 				$('img, iframe, video').css({
@@ -104,7 +106,7 @@
 						$('#panel').panel('toggle');
 					}, false);
 				}, false);
-			}
+			});
 		</script>
 	</body>
 </html>

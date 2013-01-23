@@ -59,8 +59,10 @@ var tooskiTeams = {
 	},
 	
 	loadLoginPage: function() {
-		$.mobile.changePage('#login',{role:'dialog'});
-		$('div[data-role="header"] > a[data-icon="delete"]').hide();
+		$('#login').dialog({
+			closeBtn: 'none'
+		});
+		$.mobile.changePage('#login');
 	},
 
 
