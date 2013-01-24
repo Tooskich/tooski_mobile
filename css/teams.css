@@ -4,22 +4,16 @@ h2, h3, h4, h5, h6 {
 p {
 	text-align:justify;
 }
-div {
-	-webkit-transform: translate3d(0,0,0);
-	-moz-transform: translate3d(0,0,0);
-	-ms-transform: translate3d(0,0,0);
-	-o-transform: translate3d(0,0,0);
-	transform: translate3d(0,0,0);
-
-}
 #panel {
 	background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAIUlEQVQIW2N88eLFfwY0wIhXUFxcnOHly5dgPfhVIhsLAPkFFZlLXnhSAAAAAElFTkSuQmCC) repeat;
 }
 
 #content {
-	padding-top:50px;
-	position:relative;
-	top:50px;
+	-webkit-transform: translate3d(0,0,0);
+	-moz-transform: translate3d(0,0,0);
+	-ms-transform: translate3d(0,0,0);
+	-o-transform: translate3d(0,0,0);
+	transform: translate3d(0,0,0);
 }
 @media all and (max-width: 25em) {
 	.resp-grid .ui-block-a, 
@@ -30,6 +24,11 @@ div {
 		width: 100%; 
 		float:none; 
 	}
+}
+.sublime {
+	width:0px;
+	width:100%;
+	height:auto;
 }
 .ui-navbar ul {
   overflow: visible !important;

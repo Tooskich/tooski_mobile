@@ -19,7 +19,7 @@
 				Si vous pouvez lire ce message, essayez de relancer l'application. Ou de vous reconnecter.
 			</div>
 
-			<div data-role="header" data-position="fixed">
+			<div data-role="header">
 				<div data-role="header" id="header" data-id="topBar" data-theme="a">
 					<a href="#panel" data-rel="panel" data-corners="false"><img src="images/menu.png" height="16px"></a>
 					<h1>Tooski Teams</h1>
@@ -89,10 +89,12 @@
 		<script type="text/javascript" src="js/photoswipe.js"></script>
 		<script type="text/javascript" >
 			$(document).on( "mobileinit", function(){
+				/*Connection Configurations*/
 				$.mobile.phonegapNavigationEnabled = true;
 				$.mobile.buttonMarkup.hoverDelay = 0;
         		$.support.cors = true;
-        		$.mobile.allowCrossDomainPages = true;       
+        		$.mobile.allowCrossDomainPages = true;
+        		
     		});
 			$(document).on("pageinit", function(){
 				$('img, iframe, video').css({
@@ -107,12 +109,24 @@
 					}, false);
 				}, false);
 			});
-			var iScroll = new iScroll('content');
+			var iScroll = new iScroll('content', { 
+				hScrollbar: false, 
+				vScrollbar: false, 
+				momentum: false, 
+				lockDirection: true 
+			});
 			window.onload = function() {
-				$(document).bind('create',function() {
+				$('#content').bind('create',function() {
+					/*UI Operations*/
+					$('#content').css({
+						'overflow-y': 'scroll',
+        				'-webkit-overflow-scrolling': 'touch'
+					});
+					$('#content').height($(window).height()-$('#header').height());
 					/*Performances opertions*/
-					initFastButtons();
-					iScroll.refresh();
+					setTimeout(function () {
+						iScroll.refresh();
+					}, 0);
 					iScroll.scrollTo(0, 0, 0);
 				} );
 			}

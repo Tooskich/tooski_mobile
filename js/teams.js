@@ -94,6 +94,7 @@ var tooskiTeams = {
 			$('#newsDate').html(date.getDate()+'.'+date.getMonth()+'.'+date.getFullYear()+' à '+date.getHours()+':'+date.getMinutes());
 			$('#newsContent').html(tooskiTeams.urldecode(news.text));
 		});
+		sublimeVideoActivate();
 	},
 	
 	createTeamNewsPreview: function(title, text, id, teamId) {
@@ -402,6 +403,7 @@ var tooskiTeams = {
 		$('#menu-photos').attr('onclick', 'tooskiTeams.loadTeamAlbum('+teamId+')');
 		$('#menu-calendar').attr('onclick', 'tooskiTeams.loadTeamCalendar('+teamId+')');
 		$('#menu-news').trigger('click');
+		$('#content').trigger('create');
 	},
 	
 	generateTeamMenu: function() {
