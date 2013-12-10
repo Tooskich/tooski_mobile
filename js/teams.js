@@ -98,6 +98,7 @@ var tooskiTeams = {
 	},
 
 	createTeamNewsPreview: function(title, text, id, teamId) {
+		var content;
 		if (text.indexOf('<img') != -1) {
 			var image = text.substring(text.indexOf('<img'));
 			image = image.substring(0, image.indexOf('>') + 1);
@@ -108,11 +109,11 @@ var tooskiTeams = {
 			if (image.indexOf('"') != -1) {
 				image = image.substring(0, image.indexOf('"'));
 			}
-			var content = '<img src="' + image + '" width="100%" />';
+			content = '<img src="' + image + '" width="100%" />';
 		} else {
 			var div = document.createElement("div");
 			div.innerHTML = text;
-			var content = '<p align="justify">' + (div.textContent || div.innerText || "").substring(0, 300) + '...' + '</p>';
+			content = '<p align="justify">' + (div.textContent || div.innerText || "").substring(0, 300) + '...' + '</p>';
 		}
 		return '<div onclick="tooskiTeams.showNews(' + id + ', ' + teamId + ');" class="team-news-div-preview"><h2 style="margin:0px;padding:5px;">' + title + '</h2>' + content + '</div>';
 	},
@@ -135,7 +136,7 @@ var tooskiTeams = {
 		var obj = $.parseJSON(tooskiTeams.storage.db);
 		var html = '<center><h3>Il n\'y a pas de News pour le moment.</h3>';
 		if (obj.team[teamId].news != '{"news":]}') {
-			var obj = $.parseJSON(obj.team[teamId].news);
+			obj = $.parseJSON(obj.team[teamId].news);
 			html = '<center>';
 			for (var i = 0; i < obj.news.length && i < tooskiTeams.nbNewsToShow; i++) {
 				var title = tooskiTeams.urldecode(obj.news[i].title);
@@ -198,7 +199,7 @@ var tooskiTeams = {
 		var email = obj.team[teamId].email;
 		var html = '<center><h3>Il n\'y a pas d\'évènement pour le moment</h3>';
 		if (obj.team[teamId].events != '{"event":]}') {
-			var obj = $.parseJSON(obj.team[teamId].events);
+			obj = $.parseJSON(obj.team[teamId].events);
 			html = '<center>';
 			for (var i = 0; i < obj.event.length && i < tooskiTeams.nbEventsToShow; i++) {
 				var title = tooskiTeams.urldecode(obj.event[i].title);
@@ -234,7 +235,7 @@ var tooskiTeams = {
 		var obj = $.parseJSON(tooskiTeams.storage.db);
 		var html = '<center><h3>Il n\'y a pas de photos pour l\'instant.</h3>';
 		if (obj.team[teamId].photos[albumId] != '{"photo":]}') {
-			var obj = $.parseJSON(obj.team[teamId].photos[albumId]);
+			obj = $.parseJSON(obj.team[teamId].photos[albumId]);
 			html = '<center>';
 			for (var i = 0; i < obj.photo.length; i++) {
 				var filename = tooskiTeams.urldecode(obj.photo[i].filename);
@@ -326,7 +327,7 @@ var tooskiTeams = {
 			var json = tooskiTeams.decrypt(data, tooskiTeams.storage.secret);
 			var db = $.parseJSON(tooskiTeams.storage.db);
 			if (typeof db.team[teamId].photos != 'array') {
-				db.team[teamId].photos = new Array();
+				db.team[teamId].photos = [];
 			}
 			db.team[teamId].photos[albumId] = json;
 			tooskiTeams.storage.db = JSON.stringify(db);
@@ -341,14 +342,14 @@ var tooskiTeams = {
 			return true;
 		}
 		$.parseJSON(tooskiTeams.storage.db).team[teamId].photos = '';
-		return false
+		return false;
 	},
 
 	generateAlbumsGallery: function(teamId) {
 		var obj = $.parseJSON(tooskiTeams.storage.db);
-		var html = '<div><h3>Il n\'y a pas d\'album pour l\'instant.</h3>'
+		var html = '<div><h3>Il n\'y a pas d\'album pour l\'instant.</h3>';
 		if (obj.team[teamId].albums != '{"album":]}') {
-			var obj = $.parseJSON(obj.team[teamId].albums);
+			obj = $.parseJSON(obj.team[teamId].albums);
 			html = '<div align="left" style=""><h3>Albums Photo</h3>';
 			for (var i = 0; i < obj.album.length; i++) {
 				var title = tooskiTeams.urldecode(obj.album[i].title);
@@ -500,7 +501,7 @@ var tooskiTeams = {
 		if (typeof tooskiTeams.storage.db != 'undefined') {
 			return true;
 		}
-		return false
+		return false;
 	},
 
 	/*
@@ -532,4 +533,4 @@ var tooskiTeams = {
 			functionToCall();
 		}
 	}
-}
+};
